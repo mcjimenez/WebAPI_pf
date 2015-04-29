@@ -48,12 +48,15 @@
 				<section>
 					<section>
 						<h2>What's this about?</h2>
+            <h4 class="fragment roll-in">Services! or Mediators!</h4>
 						<h3 class="fragment roll-in">Or rather...</h3>
 						<h2 class="fragment roll-in">What is this NOT about?</h2>
+						<h4 class="fragment roll-in">The actual API we use for that</h4>
 					</section>
           <section>
 					  <h2 class="fragment highlight-red">Writing privileged apps is a PITA</h2>
-						<h2 class="fragment roll-in">And writing signed apps is still going to be a PITA</h2>
+						<h2 class="fragment roll-in">And writing signed apps is <b>still</b> going to be a PITA</h2>
+						<h3 class="fragment roll-in">Sorry if you thought otherwise</h3>
 				  </section>
           <section>
 					  <h2 class="fragment highlight-red">Bazillions of web sites should mean bazillion of apps</h2>
@@ -64,31 +67,155 @@
 
         <section>
           <section>
-            <h2>So, why are they going to attack me?</h2>
+            <h2>So what can we do about this?</h2>
             <img height="400" src="imgs/Clueless Morgan.jpg" />
           </section>
           <section>
-            <h3>I'm a nice guy!...</h3>
+            <h3>Assume most people are harmless!</h3>
             <img src="imgs/1038.jpg"/>
+            <h4 class="fragment roll-in">And give unsigned access to the APIs!</h4>
             <p class ="fragment roll-in">
               No, seriously!
             </p>
           </section>
           <section>
-            <h3>And my system is completely worthless!</h3>
+            <h3>But on a controlled way</h3>
             <p class ="fragment roll-in">
-              Erm, oh wait!
+              You can breathe normally now 
             </p>
             <p class ="fragment roll-in">
-              I didn't mean to say that!
+              Seriously, you were looking blue there for a moment
             </p>
-            <p class="fragment roll-in">
-              Not out loud anyway!
-            </p>
-            <img class="fragment roll-in" src="imgs/mmw_budget_040111.jpg"/>
           </section>
         </section>
 
+        <section>
+          <section>
+            <h2>Enter Sandman!</h2>
+            <h2 class="fragment roll-in">Er I mean Services</h2>
+          </section>
+          <section>
+            <h3>I should add a image here</h3>
+            <h4 class="fragment roll-in">But I didn't really had time</h4>
+            <p class ="fragment roll-in">
+              So you're going to have to do with some code
+            </p>
+          </section>
+          <section>
+            <h3>The idea, take 1</h3>
+            <h4 class ="fragment roll-in">Add a new class of system apps: services</h4>
+          </section>
+          <section>
+            <h3 class ="fragment roll-in">Client code</p>
+					<pre class="fragment roll-in"><code data-trim>
+navigator.connect(SETTINGS_SERVICE).then(port => {
+  debug('Successfuly established connection to ' + SETTINGS_SERVICE);
+  _port = port;
+  port.onmessage = function (evt) {
+    var handler = _getHandler(evt);
+    if (!handler) {
+      debug('Huh? Got an message with ' + JSON.stringify(evt.data) +
+            ' that I don\'t know what to do with. Discarding!');
+      return;
+     }
+    handler(evt.data);
+  };
+}
+					</code></pre>
+          </section>
+          <section>
+            <h3 class="fragment roll-in">Service code</p>
+					<pre class="fragment roll-in"><code data-trim>
+this.onconnect = function(msg) {
+  debug('SW onconnect: We should have a port here on msg.source. ' +
+        (msg.source.postMessage ? 'yes!' : 'no :('));
+
+  // TO-DO: This is not very secure... but we could, er should, control the origin here!
+  msg.acceptConnection(true);
+
+  var remotePort = msg.source;
+  var myPortId = this._portId++;
+
+  remotePort.onmessage = aMsg => {
+    // TO-DO: We should implement access control here also!
+    var requestId = aMsg.data.id;
+    if (requestId) {
+      debug('onmessage. Got Request:' + JSON.stringify(aMsg.data));
+      // In sw APIS do not work!!!! We need to request it to the main thread
+
+      this.channelToMT.then(channel => {
+        // TO-DO: Multiplex the channel!
+        channel.postMessage({remotePortId: myPortId, remoteData: aMsg.data});
+      });
+    } else {
+      // Hmm...
+      debug('onmessage: got a message without id');
+    }
+  };
+};
+					</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Fuck it, this is still too complicated!</h2>
+          </section>
+          <section>
+            <h2>Let's just rewrite the APIs using this!</h2>
+					<pre class="fragment roll-in"><code data-trim>
+// This will have to be a SettingsManager object...
+// Note that since mozSettings constructor is synchronous but we can't make
+// this synchronous, this has an unfortunate difference where the object might
+// disappear later.
+window.navigator.mozSettings = {
+  createLock: createLock,
+  addObserver: addObserver,
+  removeObserver: removeObserver
+};
+
+// Returns a SettingsLock object to safely access settings asynchronously.
+// Note that the lock might be created and yet everything fail on it...
+var createLock = function() {
+  var lock = new FakeSettingsLock();
+  navConnPromise.then(navConnHelper => navConnHelper.sendObject(lock));
+  return lock;
+};
+
+// Allows to bind a function to any change on a given settings
+var addObserver = function(setting, callback) {
+  var observer = new Observer(callback);
+  _observers[setting][callback] = observer;
+  navConnPromise.then(navConnHelper => navConnHelper.sendObject(observer));
+};
+
+// Allows to unbind a function previously set with addObserver.
+var removeObserver = function(setting, callback) {
+  if (!_observers[setting][callback]) {
+    return;
+  }
+  var obRemoval = new ObserverRemoval(_observers[setting][callback]);
+  navConnPromise.then(navConnHelper => navConnHelper.sendObject(obRemoval));
+  delete _observers[setting][callback];
+};
+
+
+					</code></pre>
+          </section>
+        </section>
+        <section>
+         <h3>Enter push</h3>
+         <h4 class="fragment roll-in">And the only limit is your imagination!</h4>
+            <ol>
+              <li class="fragment roll-in">Send SMS from your phone... using your desktop browser?<span style="color: red;" class="fragment roll-in">: Gotcha!</span></li>
+              <li class="fragment roll-in">Find and block your phone using SMS from your desktop?<span style="color: red;" class="fragment roll-in">: Why, yes!</span></li>
+              <li class="fragment roll-in">Use the same phone specific (same code!) on the device and desktop?<span style="color: red;" class="fragment roll-in">: Of course!</span></li>
+              <li class="fragment roll-in">Write an application that uses SMS/phone/whatever to identify the user (*cough*Known IM service*cough*)?<span style="color: red;" class="fragment roll-in">: Yep!</span></li>
+              <li class="fragment roll-in">Increase your success with your favorite sex?<span style="color: red;" class="fragment roll-in">: On the next version!</span></li>
+            </ol>
+         <h3 class="fragment roll-in">And all of that without signing the app!</h3>
+         <p class="fragment roll-in">Hell, it does <b>not</b> even have to be an app. F<span class="fragment roll-in">orget</span> the manifest</p>
+        </section>
 				<section>
 					<h1>Questions?</h1>
 				</section>
