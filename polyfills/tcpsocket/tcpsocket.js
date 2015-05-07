@@ -234,7 +234,7 @@
                                        {
                                          methodName: _op,
                                          numParams: _ops[_op].numParams,
-                                         returnValue: _ops[_op].retValue,
+                                         returnValue: _ops[_op].returnValue,
                                          promise: _sock,
                                          field: 'socketId'
                                        });

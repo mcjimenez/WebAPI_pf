@@ -250,6 +250,104 @@
     };
   }
 
+  function FakeEventTarget(navConnHelper, listenerCb, field, promise) {
+    // _listeners[type][ListenerId] => undefined or a callback function
+    var _listeners = {};
+    promise = promise || Promise.resolve(null);
+
+    // And this is something else that might be reusable...
+    function Listener(reqId, extraData) {
+      _listeners[extraData.type][reqId] = extraData.cb;
+      this.serialize = function() {
+        return {
+          id: reqId,
+          data: extraData,
+          processAnswer: answer => {
+            if (answer.event) {
+              listenerCb(answer.event, _listeners[extraData.type][reqId]);
+            }
+          }
+        };
+      };
+    }
+
+    function ListenerRemoval(reqId, extraData) {
+      this.serialize = function() {
+        return {
+          id: reqId,
+          data: extraData,
+          processAnswer: answer => debug('Got an invalid answer for: ' + reqId)
+        };
+      };
+    }
+
+    function Dispatcher(reqId, extraData) {
+      this.serialize = function() {
+        return {
+          id: reqId,
+          data: extraData,
+          processAnswer: answer => debug('Got an invalid answer for: ' + reqId)
+        };
+      };
+    }
+
+    this.addEventListener = function(type, cb, useCapture) {
+      if (!_listeners[type]) {
+        _listeners[type] = {};
+      }
+      promise.then(value => {
+        var data = {
+          operation: 'addEventListener',
+          type: type,
+          useCapture: useCapture,
+          cb: cb
+        };
+
+        data[field] = value;
+        navConnHelper.createAndQueueRequest(data, Listener);
+      });
+    };
+
+    this.removeEventListener = function(type, cb) {
+      var listeners = _listeners[type];
+      var listenerId = -1;
+      for (var key in listeners) {
+        if (listeners[key] === cb) {
+          listenerId = key;
+          break;
+        }
+      }
+
+      if (cbIndex === -1) {
+        return;
+      }
+
+      promise.then(value => {
+        var data = {
+          operation: 'removeEventListener',
+          type: type,
+          listenerId: listenerId
+        };
+
+        data[field] = value;
+        navConnHelper.createAndQueueRequest(data, ListenerRemoval);
+      });
+      delete _listeners[type][listenerId];
+    };
+
+    this.dispatchEvent = function(event) {
+      promise.then(value => {
+        var data = {
+          operation: 'dispatchEvent',
+          event: event
+        };
+
+        data[field] = value;
+        navConnHelper.createAndQueueRequest(data, Dispatcher);
+      });
+    };
+  }
+
   function HandlerSetRequest(reqId, extraData) {
     this.serialize = function() {
       return {
@@ -281,5 +379,6 @@
   window.NavConnectHelper = NavConnectHelper;
   window.FakeDOMRequest = FakeDOMRequest;
   window.FakeDOMCursorRequest = FakeDOMCursorRequest;
+  window.FakeEventTarget = FakeEventTarget;
 
 })(window);
