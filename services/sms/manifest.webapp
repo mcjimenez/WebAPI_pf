@@ -3,7 +3,7 @@
   "name": "SMSService",
   "description": "SMS Service",
   "type": "certified",
-  "launch_path": "/WebAPI_pf/servicesi/sms/index.html",
+  "launch_path": "/WebAPI_pf/services/sms/index.html",
   "icons": {
     "128": "/WebAPI_pf/services/common/style/icons/icon.png",
     "512": "/WebAPI_pf/services/common/style/icons/icon.png"
