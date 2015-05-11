@@ -7,7 +7,7 @@
 
   window.Tests['sms'] =
     LazyLoader.dependencyLoad(dependencies).then(() => {
-      var log = window.Tests.log.bind(undefined, 'sms');
+      var log = window.Tests.log.bind(undefined, 'smsTest');
       return {
         runTest: function() {
           function abort(e) {
@@ -32,7 +32,7 @@
           }
 
           try {
-            log('Starting settings polyfill tests');
+            log('Starting sms polyfill tests');
             window.navigator.mozMobileMessage ||
               abort('window.navigator.mozMobileMessage not defined.');
 

@@ -6,6 +6,7 @@
   }
 
   debug('/services/sms/js/app.js --> loading!!');
+
   // Ok, this kinda sucks because most APIs (and sms is one of them) cannot
   // be accessed from outside the main thread. So basically everything has to go
   // down to the SW thread, then back up here for processing, then back down to

@@ -8,10 +8,10 @@
   }
 
   function debug(str) {
-    console.log("CJC -*-:" + str);
+    // console.log("NC Polyfill (SW) -*-:" + str);
   }
 
-  debug('POLYFILL SW Loaded!');
+  debug('Loaded!');
 
   // Messages that come from IAC should be marked somehow to distinguish them
   // from other messages the hosting app might want to pass.
@@ -23,7 +23,7 @@
   // onconnect handler expect, and invokes the adequate handler. The only
   // messages passed this way are the connection ones!
   function transmitMessage(evt) {
-    debug('POLYFILL SW executing transmitMessage...');
+    debug('executing transmitMessage...');
 
     // In theory,
     // evt.ports[0] should correspond to the MessagePort that was transferred
@@ -32,7 +32,7 @@
     // handler from the controlled page.
 
     // Maybe we would need to do something with this...
-    debug('POLYFILL SW isConnectionRequest msg:'+JSON.stringify(evt.data));
+    debug('isConnectionRequest msg:'+JSON.stringify(evt.data));
     var connectionMessage = evt.data.dataToSend || {};
 
     // We need to construct here what we will pass to onconnect, based on what
@@ -55,8 +55,8 @@
         aPromise = Promise.resolve(aPromise);
       }
       aPromise.then(accepted => {
-        debug('POLYFILL SW acceptConnection accepted:' + accepted);
-        connectionMessage.source.postMessage({ accepted: accepted });
+        debug('acceptConnection accepted:' + accepted);
+        connectionMessage.source.postMessage({accepted: accepted});
         // Now if we've *not* accepted the connection, we can clean up here
         if (!accepted) {
           delete connectionMessage.source;
@@ -64,17 +64,17 @@
       });
     };
 
-    if (sw.onconnect && typeof sw.onconnect === "function") {
-      debug('POLYFILL SW executing onConnect with --> ' +
+    if (sw.onconnect && typeof sw.onconnect == "function") {
+      debug('executing onConnect with --> ' +
             JSON.stringify(connectionMessage));
       sw.onconnect(connectionMessage);
     }
   }
 
   sw.addEventListener('message', function(evt) {
-    debug('POLYFILL SW Message Handler: ' + JSON.stringify(evt.data));
+    debug('Message Handler: ' + JSON.stringify(evt.data));
     if (!isInternalMessage(evt)) {
-      debug('POLYFILL SW Got a message that\'s not for us, ignoring');
+      debug('Got a message that\'s not for us, ignoring');
       return;
     }
     var data = transmitMessage(evt);
