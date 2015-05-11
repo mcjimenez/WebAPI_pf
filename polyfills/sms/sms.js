@@ -113,6 +113,8 @@
     })
   );
 
+  debug('exports.navigator.mozMobileMessage:'+(exports.navigator.mozMobileMessage?'existe':'NOOO existe'));
+
   exports.navigator.mozMobileMessage = fakeMozMobileMessage;
 
   var navConnHelper = new NavConnectHelper(SMS_SERVICE);
