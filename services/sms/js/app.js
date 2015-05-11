@@ -76,12 +76,23 @@
 
 
   var processSWRequest = function(channel, evt) {
+    debug('processSWRequest --> processing a msg:' +
+          (evt.data ? JSON.stringify(evt.data): 'msg without data'));
+var data = evt.data;
+for (var kk in data) {
+  debug(kk + ':' + JSON.stringify(data[kk]));
+}
     var remotePortId = evt.data.remotePortId;
     var request = evt.data.remoteData;
     var requestOp = request.data.operation;
-
-    _operations[requestOp.op] &&
-      _operations[requestOp.op](channel, evt.data);
+debug('operation:' + requestOp.op);
+    if (requestOp.op in _operations) {
+debug('we known ' + requestOp.op+'operation');
+      _operations[requestOp.op] &&
+        _operations[requestOp.op](channel, evt.data);
+    } else {
+      console.error('SMS service ' + requestOp.op + ' operation unknown');
+    }
   };
 
 
