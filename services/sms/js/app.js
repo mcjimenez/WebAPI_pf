@@ -37,12 +37,15 @@
       var remotePortId = request.remotePortId;
       // Params for the local operation:
       var opData = request.remoteData.data.params;
-      var reqId = request.remoteData.reqId;
+      var reqId = request.remoteData.id;
       _sms.send(opData.number, opData.txt, opData.options).
-        then(successData =>
+        then(sucessData =>
           channel.postMessage({
             remotePortId: remotePortId,
-            data: successData
+            data: {
+              id: request.id,
+              data: sucessData
+            }
           })
         ).catch(
           error =>
@@ -85,13 +88,13 @@ for (var kk in data) {
     var remotePortId = evt.data.remotePortId;
     var request = evt.data.remoteData;
     var requestOp = request.data.operation;
-debug('operation:' + requestOp.op);
-    if (requestOp.op in _operations) {
-debug('we known ' + requestOp.op+'operation');
-      _operations[requestOp.op] &&
-        _operations[requestOp.op](channel, evt.data);
+debug('operation:' + requestOp);
+    if (requestOp in _operations) {
+debug('we known ' + requestOp+'operation');
+      _operations[requestOp] &&
+        _operations[requestOp](channel, evt.data);
     } else {
-      console.error('SMS service ' + requestOp.op + ' operation unknown');
+      console.error('SMS service unknown operation:' + requestOp.op);
     }
   };
 
