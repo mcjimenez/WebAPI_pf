@@ -39,19 +39,36 @@
       var opData = request.remoteData.data.params;
       var reqId = request.remoteData.id;
       _sms.send(opData.number, opData.txt, opData.options).
-        then(sucessData =>
+        then(sucessData => {
+debug('SMS sended, result:');
+for (var kk in sucessData){
+debug(kk +':'+JSON.stringify(sucessData[kk]));
+}
+
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
               id: request.id,
-              data: sucessData
+              data: {
+                target: {
+                  result: sucessData.target.result
+                }
+              }
             }
-          })
+          });
+        }
         ).catch(
           error =>
           channel.postMessage({
             remotePortId: remotePortId,
-            error: error
+            data: {
+              id: request.id,
+              data: {
+                target: {
+                  error: error.target.error
+                }
+              }
+            }
           })
         );
     },
