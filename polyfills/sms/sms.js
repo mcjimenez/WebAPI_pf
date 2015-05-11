@@ -113,7 +113,7 @@
     })
   );
 
-  exports.navigator.mozMobileMessage.send = fakeMozMobileMessage;
+  exports.navigator.mozMobileMessage = fakeMozMobileMessage;
 
   var navConnHelper = new NavConnectHelper(SMS_SERVICE);
 
