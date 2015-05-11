@@ -39,12 +39,7 @@
       var opData = request.remoteData.data.params;
       var reqId = request.remoteData.id;
       _sms.send(opData.number, opData.txt, opData.options).
-        then(successData => {
-debug('SMS sended, result:');
-for (var kk in successData){
-debug(kk +':'+JSON.stringify(successData[kk]));
-}
-
+        then(successData =>
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
@@ -55,30 +50,22 @@ debug(kk +':'+JSON.stringify(successData[kk]));
                 }
               }
             }
-          });
-        }
-        ).catch(
-          error => {
-debug('SMS sended, ERROR:');
-for (var kk in error){
-debug(kk +':'+JSON.stringify(error[kk]));
-}
-
-          channel.postMessage({
-            remotePortId: remotePortId,
+          })
+        ).catch(error => channel.postMessage({
+          remotePortId: remotePortId,
+          data: {
+            id: request.id,
             data: {
-              id: request.id,
-              data: {
-                target: {
-                  error: {
-                    name: error.name,
-                    message: error.message
-                  }
+              target: {
+                error: {
+                  name: error.name,
+                  message: error.message
                 }
               }
             }
-          })
-        });
+          }
+        })
+      );
     },
 
     sendMMS: function(channel, request) {
@@ -129,7 +116,7 @@ debug(kk +':'+JSON.stringify(error[kk]));
       };
     },
 
-    getMessages: function(channel, request) {
+    getMessage: function(channel, request) {
     },
     delete: function(channel, request) {
     },
@@ -158,7 +145,7 @@ for (var kk in data) {
     var requestOp = request.data.operation;
 debug('operation:' + requestOp);
     if (requestOp in _operations) {
-debug('we known ' + requestOp+'operation');
+debug('we know ' + requestOp +' operation');
       _operations[requestOp] &&
         _operations[requestOp](channel, evt.data);
     } else {
