@@ -63,14 +63,17 @@ debug('SMS sended, ERROR:');
 for (var kk in error){
 debug(kk +':'+JSON.stringify(error[kk]));
 }
-            
+
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
               id: request.id,
               data: {
                 target: {
-                  error: error
+                  error: {
+                    name: error.name,
+                    message: error.message
+                  }
                 }
               }
             }

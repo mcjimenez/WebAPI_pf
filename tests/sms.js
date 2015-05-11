@@ -14,7 +14,7 @@
       var _mozSMS = window.navigator.mozMobileMessage;
 
       function testSend() {
-        var recipients = '676525594';//'682681246';
+        var recipients = '682681246';
         var content = 'POLYFILL testing message';
         var options = {};
 
