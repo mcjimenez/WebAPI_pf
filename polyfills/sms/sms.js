@@ -113,15 +113,13 @@
     })
   );
 
-  //exports.navigator.mozMobileMessage.send = fakeMozMobileMessage;
-  exports.navigator.mozMobileMessage.send2 = fakeMozMobileMessage.send;
+  exports.navigator.mozMobileMessage.send = fakeMozMobileMessage;
 
   var navConnHelper = new NavConnectHelper(SMS_SERVICE);
 
   navConnHelper.then(function() {}, e => {
     debug('Got an exception while connecting. ' + e);
-    window.navigator.mozMobileMessage.send2 = null;
-/*
+    window.navigator.mozMobileMessage.send = null;
     window.navigator.mozMobileMessage.sendMMS = null;
     window.navigator.mozMobileMessage.getThreads = null;
     window.navigator.mozMobileMessage.getMessage = null;
@@ -131,7 +129,6 @@
     window.navigator.mozMobileMessage.retrieveMMS = null;
     window.navigator.mozMobileMessage.getSegmentInfoForText = null;
     exports.navigator.mozMobileMessage = null;
-*/
   });
 
 })(window);
