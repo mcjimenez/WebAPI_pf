@@ -58,7 +58,12 @@ debug(kk +':'+JSON.stringify(sucessData[kk]));
           });
         }
         ).catch(
-          error =>
+          error => {
+debug('SMS sended, ERROR:');
+for (var kk in error){
+debug(kk +':'+JSON.stringify(error[kk]));
+}
+            
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
@@ -70,7 +75,7 @@ debug(kk +':'+JSON.stringify(sucessData[kk]));
               }
             }
           })
-        );
+        });
     },
     sendMMS: function(channel, request) {
     },
