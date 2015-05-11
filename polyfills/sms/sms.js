@@ -110,7 +110,7 @@
           navConn.sendObject(commandObject);
         });
       }
-    });
+    })
   );
 
   //exports.navigator.mozMobileMessage.send = fakeMozMobileMessage;
