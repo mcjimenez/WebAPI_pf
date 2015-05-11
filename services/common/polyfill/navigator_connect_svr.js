@@ -10,6 +10,7 @@
     console.log("CJC -*-:" + str);
   }
 
+  debug('navigator_connect_svr --> loading!');
   var cltCount = 0;
 
   var connections = {};

@@ -10,6 +10,8 @@ function debug(str) {
   console.log('Setting Service SW -*- -->' + str);
 }
 
+debug('Loading sw.js');
+
 // ADDED FOR POLYFILL: Import the polyfill script
 this.importScripts('webAPI_pf/services/common/polyfill/navigator_connect_sw.js');
 // END ADDED FOR POLYFILL
@@ -42,8 +44,9 @@ this.channelToMT.then(channel => {
   };
 });
 
-// This has a *HUGE* problem currently! It's not safe to accept more than one connection!
-// mostly because we're multiplexing the channel to the MT without really multiplexing it
+// This has a *HUGE* problem currently! It's not safe to accept more than one
+// connection! mostly because we're multiplexing the channel to the MT without
+// really multiplexing it
 this.onconnect = function(msg) {
   debug('SW onconnect: We should have a port here on msg.source. ' +
         (msg.source.postMessage ? 'yes!' : 'no :('));

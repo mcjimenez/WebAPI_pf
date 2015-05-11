@@ -5,6 +5,8 @@
     console.log('-*-*- ServHelper: ' + str);
   }
 
+  debug('serv_helper --> loading');
+
   // This is a very basic sample app that uses a SW and acts as a server for
   // navigator.connect. I'm going to mark with a comment where the app MUST
   // add some extra code to use the navigator.connect SHIM
