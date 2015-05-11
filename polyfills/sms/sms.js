@@ -1,5 +1,8 @@
 // navigator.mozMobileMessage polyfill!
 // https://developer.mozilla.org/en-US/docs/Web/API/MozMobileMessageManager
+// It's better to look directly the idl
+// https://mxr.mozilla.org/mozilla-central/source/dom/webidl/MozMobileMessageManager.webidl
+// because the documentation at developer.mozilla.org is not always up to date
 
 (function(exports) {
 
@@ -15,6 +18,13 @@
   var SMS_SERVICE = 'https://smsservice.gaiamobile.org';
 
   var _currentRequestId = 1;
+
+  // Note to self: This is used on almost all the polyfills... move to common?
+  function _createAndQueueRequest(data, constructor) {
+    var request = new constructor(++_currentRequestId, data);
+    navConnHelper.then(navConn => navConn.sendObject(request));
+    return request;
+  }
 
   var fakeMozMobileMessage = {
     /**
@@ -46,10 +56,29 @@
           options: aOptions
         }
       };
-      var request = new FakeDOMRequest(++_currentRequestId, data);
-      navConnHelper.then(navConn => navConn.sendObject(request));
-      return request;
-    }/*,
+      return _createAndQueueRequest(data, FakeDOMRequest);
+    },
+    /**
+      * DOMCursor getMessages(optional MobileMessageFilter filter,
+      *                       optional boolean reverse = false);
+      **/
+    getMessages: function(aFilter, aReverse) {
+      debug('Called getMessages with filter:' + JSON.stringify(aFilter) +
+            ', reverse:'+ aReverse);
+      var data = {
+        operation: 'getMessages',
+        params: {
+          filter: aFilter,
+          reverse: aReverse
+        }
+      };
+      return _createAndQueueRequest(data, FakeDOMCursorRequest);
+    },
+
+    addEventListener: function(evt, fc) {
+      this['on' + evt] = fc;
+    }
+    /*,
     sendMMS: function(aParams) {
       debug('Called sendMMS with params:' + JSON.stringify(aParams));
     },
@@ -58,10 +87,6 @@
     },
     getMessage: function(aId) {
       debug('Called getMessage with id:' + aId);
-    },
-    getMessages: function(aFilter, aReverse) {
-      debug('Called getMessages with filter:' + aFilter +
-            ', reverse:'+ aReverse);
     },
     delete: function(aId) {
       debug('Called delete with id:' + aId);

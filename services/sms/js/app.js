@@ -39,10 +39,10 @@
       var opData = request.remoteData.data.params;
       var reqId = request.remoteData.id;
       _sms.send(opData.number, opData.txt, opData.options).
-        then(sucessData => {
+        then(successData => {
 debug('SMS sended, result:');
-for (var kk in sucessData){
-debug(kk +':'+JSON.stringify(sucessData[kk]));
+for (var kk in successData){
+debug(kk +':'+JSON.stringify(successData[kk]));
 }
 
           channel.postMessage({
@@ -51,7 +51,7 @@ debug(kk +':'+JSON.stringify(sucessData[kk]));
               id: request.id,
               data: {
                 target: {
-                  result: sucessData
+                  result: successData
                 }
               }
             }
@@ -80,12 +80,55 @@ debug(kk +':'+JSON.stringify(error[kk]));
           })
         });
     },
+
     sendMMS: function(channel, request) {
     },
     getThreads: function(channel, request) {
     },
     getMessages: function(channel, request) {
+      var remotePortId = request.remotePortId;
+      // Params for the local operation:
+      var opData = request.remoteData.data.params;
+      var reqId = request.remoteData.id;
+
+      // FIX-ME: Due to the way FakeDOMCursorRequest is implemented, we
+      // have to return all the fetched data on a single message
+      var cursor = _sms.getMessages(opData.filter, opData.reverse);
+      var _messages = [];
+      cursor.onsuccess = function onsuccess() {
+        debug("getMessages.cursor.onsuccess: " + this.done + ", " +
+              JSON.stringify(this.result));
+        if (!this.done) {
+          _messages.push(this.result);
+          this.continue();
+        } else {
+          // Send the data back
+          channel.postMessage({
+            remotePortId: remotePortId,
+            data: {
+              id: request.id,
+              data: {
+                result: _messages
+              }
+            }
+          });
+        }
+      };
+      cursor.onerror = function onerror() {
+        var msg = 'getMessages. Error: ' + this.error.name;
+        debug(msg);
+        channel.postMessage({
+          remotePortId: remotePortId,
+          data: {
+            id: request.id,
+            data: {
+              error: this.error.name
+            }
+          }
+        });
+      };
     },
+
     getMessages: function(channel, request) {
     },
     delete: function(channel, request) {

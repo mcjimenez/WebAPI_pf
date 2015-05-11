@@ -2,6 +2,30 @@
 (function(window) {
   window.Tests = window.Tests || {};
 
+  function onMessageReceived(log, e) {
+    var message = e.message;
+
+    if (message.messageClass && message.messageClass === 'class-0') {
+      return;
+    }
+
+    // Here we can only have one sender, so deliveryInfo[0].deliveryStatus =>
+    // message status from sender. Ignore 'pending' messages that are received
+    // this means we are in automatic download mode
+    if (message.delivery === 'not-downloaded' &&
+        message.deliveryInfo[0].deliveryStatus === 'pending') {
+      return;
+    }
+
+    log('message-received' + JSON.stringify(message));
+  };
+
+  function setHandlers(mozSMS, log) {
+    mozSMS.addEventListener(
+      'received', onMessageReceived.bind(undefined, log)
+    );
+  };
+
   window.Tests['sms'] = {
     dependencies : [
       '/WebAPI_pf/polyfills/common/webapi_poly_common.js',
@@ -27,13 +51,33 @@
           log('Failured sending msg' + JSON.stringify(error));
         });
       }
+      function testGetMessages() {
+        var cursor = _mozSMS.getMessages({}, true);
+
+        cursor.onsuccess = function onsuccess() {
+          log("testGetMessages.cursor.onsuccess: " + this.done + ", " +
+              JSON.stringify(this.result));
+          if (!this.done) {
+            this.continue();
+          } else {
+            log("testGetMessages: All done!");
+          }
+        };
+        cursor.onerror = function onerror() {
+          var msg = 'getMessages. Error: ' + this.error.name;
+          log(msg);
+        };
+      }
 
       try {
         log('Starting sms polyfill tests');
         window.navigator.mozMobileMessage ||
           abort('window.navigator.mozMobileMessage not defined.');
 
+        setHandlers(_mozSMS, log);
+
         testSend();
+        testGetMessages();
       } catch (e) {
         log("Finished early with " + e);
       }

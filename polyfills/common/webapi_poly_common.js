@@ -136,7 +136,68 @@
     };
   }
 
+  // Implements something like
+  // http://mxr.mozilla.org/mozilla-central/source/dom/base/nsIDOMDOMCursor.idl
+  // FIX-ME: Note that this implementation expects the remote side to serialize
+  // all the cursor content to send it back on one single answer. This is
+  // suboptimal if the cursor holds a lot of data (like for SMS...).
+  function FakeDOMCursorRequest(reqId, extraData) {
+    FakeDOMRequest.call(this, reqId, extraData);
+    var _done = false;
+    var _serializedData = null;
+    var _cursor = 0;
+
+    var self = this;
+    this.serialize = function() {
+      return {
+        id: reqId,
+        data: extraData,
+        processAnswer: function(answer) {
+          if (answer.error) {
+            self._fireError(answer.error);
+          } else {
+            _serializedData = answer.result;
+            self.continue();
+          }
+        }
+      };
+    };
+
+    this.then = undefined;
+
+    Object.defineProperty(this, 'done', {
+      get: function() {
+        return _done;
+      }
+    });
+
+    this.continue = function() {
+      if (!_done) {
+        _result = _serializedData[_cursor];
+        this._fireSuccess();
+      }
+    };
+
+    this._fireSuccess = function() {
+      if (!_done) {
+        _cursor++;
+        _done = _cursor > _serializedData.length ? true : false;
+        this.onsuccess &&
+          typeof this.onsuccess === 'function' && this.onsuccess();
+      }
+    };
+
+    this._fireError = function(error) {
+      if (!_done) {
+        _error = error;
+        this.onerror
+          && typeof this.onerror === 'function' && this.onerror(error);
+      }
+    };
+  }
+
   window.NavConnectHelper = NavConnectHelper;
   window.FakeDOMRequest = FakeDOMRequest;
+  window.FakeDOMCursorRequest = FakeDOMCursorRequest;
 
 })(window);
