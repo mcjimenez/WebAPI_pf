@@ -51,7 +51,7 @@ debug(kk +':'+JSON.stringify(sucessData[kk]));
               id: request.id,
               data: {
                 target: {
-                  result: sucessData.target.result
+                  result: sucessData
                 }
               }
             }
@@ -65,7 +65,7 @@ debug(kk +':'+JSON.stringify(sucessData[kk]));
               id: request.id,
               data: {
                 target: {
-                  error: error.target.error
+                  error: error
                 }
               }
             }
