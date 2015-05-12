@@ -35,13 +35,13 @@
     // http://mxr.mozilla.org/mozilla-central/source/dom/mobilemessage/interfaces/nsIDOMMozSmsMessage.idl
     // http://mxr.mozilla.org/mozilla-central/source/dom/mobilemessage/interfaces/nsIDOMMozMmsMessage.idl
     var newMsg = {};
-    msg.type && newMsg.type = msg.type;
-    msg.id && newMsg.id = msg.id;
-    msg.threadId && newMsg.threadId = msg.threadId;
-    msg.iccId && newMsg.iccId = msg.iccId;
-    msg.delivery && newMsg.delivery = msg.delivery;
-    msg.sender && newMsg.sender = msg.sender;
-    msg.timestamp && newMsg.timestamp = msg.timestamp;
+    msg.type && (newMsg.type = msg.type);
+    msg.id && (newMsg.id = msg.id);
+    msg.threadId && (newMsg.threadId = msg.threadId);
+    msg.iccId && (newMsg.iccId = msg.iccId);
+    msg.delivery && (newMsg.delivery = msg.delivery);
+    msg.sender && (newMsg.sender = msg.sender);
+    msg.timestamp && (newMsg.timestamp = msg.timestamp);
     msg.sentTimestamp && newMsg.sentTimestamp = msg.sentTimestamp;
     msg.read && newMsg.read = msg.read;
 
