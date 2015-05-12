@@ -77,7 +77,7 @@
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
-              id: request.id,
+              id: reqId,
               data: {
                 target: {
                   result: successData
@@ -88,7 +88,7 @@
         ).catch(error => channel.postMessage({
           remotePortId: remotePortId,
           data: {
-            id: request.id,
+            id: reqId,
             data: {
               target: {
                 error: {
@@ -127,9 +127,8 @@
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
-              id: request.id,
+              id: reqId,
               data: {
-                id: request.id,
                 result: _messages
               }
             }
@@ -142,7 +141,7 @@
         channel.postMessage({
           remotePortId: remotePortId,
           data: {
-            id: request.id,
+            id: reqId,
             data: {
               error: this.error.name
             }
@@ -171,16 +170,10 @@
   var processSWRequest = function(channel, evt) {
     debug('processSWRequest --> processing a msg:' +
           (evt.data ? JSON.stringify(evt.data): 'msg without data'));
-var data = evt.data;
-for (var kk in data) {
-  debug(kk + ':' + JSON.stringify(data[kk]));
-}
-    var remotePortId = evt.data.remotePortId;
+
     var request = evt.data.remoteData;
     var requestOp = request.data.operation;
-debug('operation:' + requestOp);
     if (requestOp in _operations) {
-debug('we know ' + requestOp +' operation');
       _operations[requestOp] &&
         _operations[requestOp](channel, evt.data);
     } else {
