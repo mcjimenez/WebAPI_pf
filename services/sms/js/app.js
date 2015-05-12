@@ -120,10 +120,6 @@
         debug("getMessages.cursor.onsuccess: " + this.done + ", " +
               JSON.stringify(this.result));
         if (!this.done) {
-for (var kk in this.result) {
-debug(kk+':'+JSON.stringify(this.result[kk]));
-}
-
           _messages.push(cloneMessage(this.result));
           this.continue();
         } else {
