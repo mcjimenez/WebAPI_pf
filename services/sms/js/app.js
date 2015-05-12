@@ -97,7 +97,7 @@ debug(kk+':'+JSON.stringify(this.result[kk]));
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
-              //id: request.id,
+              id: request.id,
               data: {
                 id: request.id,
                 result: _messages
