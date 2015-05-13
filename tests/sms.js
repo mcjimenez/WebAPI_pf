@@ -90,8 +90,8 @@
 
         setHandlers(_mozSMS, log);
 
-        testSend();
-        testGetMessages();
+        //testSend();
+        //testGetMessages();
         testGetMessage();
       } catch (e) {
         log("Finished early with " + e);
