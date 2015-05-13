@@ -128,7 +128,7 @@
         var isRead = true;
         var sendReadReport = true;
 
-        var req  = _mozSMS.send(id, isRead, sendReadReport);
+        var req  = _mozSMS.markMessagesRead(id, isRead, sendReadReport);
 
         req.onsuccess = function() {
           log('Successfuly markMsgRead' + JSON.stringify(this.result));
