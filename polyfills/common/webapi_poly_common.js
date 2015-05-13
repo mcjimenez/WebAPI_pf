@@ -153,6 +153,7 @@
         id: reqId,
         data: extraData,
         processAnswer: function(answer) {
+console.log('processAnswer --> answer:' + JSON.stringify(answer));
           if (answer.error) {
             self._fireError(answer.error);
           } else {
