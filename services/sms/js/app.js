@@ -128,13 +128,12 @@ debug('load handler for ' + eventType);
           this.continue();
         } else {
           // Send the data back
+
           channel.postMessage({
             remotePortId: remotePortId,
             data: {
               id: reqId,
-              data: {
-                result: _messages
-              }
+              result: _messages
             }
           });
         }
