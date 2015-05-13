@@ -123,12 +123,12 @@
         };
       }
 
-      function testMarkMessagesRead() {
+      function testMarkMessageRead() {
         var id = 1;
         var isRead = true;
         var sendReadReport = true;
 
-        var req  = _mozSMS.markMessagesRead(id, isRead, sendReadReport);
+        var req  = _mozSMS.markMessageRead(id, isRead, sendReadReport);
 
         req.onsuccess = function() {
           log('Successfuly markMsgRead' + JSON.stringify(this.result));
@@ -136,7 +136,7 @@
         req.onerror = function() {
           var text = 'Error while marking message ' + id +
                      ' as read:' + this.error.name;
-          log('Failured markMsgReadsending msg -->' + text);
+          log('Failured markMsgRead. msg -->' + text);
         };
       }
 
@@ -152,7 +152,7 @@
         testGetMessage();
 //        testDelete();
 //        testGetThreads();
-        testMarkMessagesRead();
+        testMarkMessageRead();
       } catch (e) {
         log("Finished early with " + e);
       }
