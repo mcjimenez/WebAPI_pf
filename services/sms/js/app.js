@@ -29,20 +29,16 @@
              remotePortId: remotePortId,
              data: {
                id: reqId,
-               data: {
-                 result: window.ServiceHelper.cloneObject(successData)
-               }
+               result: window.ServiceHelper.cloneObject(successData)
              }
            })
           ).catch(error => channel.postMessage({
             remotePortId: remotePortId,
             data: {
               id: reqId,
-              data: {
-                error: {
-                  name: error.name,
-                  message: error.message
-                }
+              error: {
+                name: error.name,
+                message: error.message
               }
             }
           })
