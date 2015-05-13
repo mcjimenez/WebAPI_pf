@@ -18,6 +18,7 @@
 
   function setHandler(eventType, channel, request) {
 debug('launch setHandler ' + eventType + ', request:' + JSON.stringify(request));
+    var reqId = request.remoteData.id;
     var remotePortId = request.remotePortId;
 
     function handlerTemplate(evt) {
@@ -26,7 +27,7 @@ debug('handlerTemplate :'+JSON.stringify(request));
       channel.postMessage({
         remotePortId: remotePortId,
         data: {
-          id: request.id,
+          id: reqId,
           data: evt.data
         }
       });

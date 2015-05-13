@@ -58,6 +58,10 @@
       };
       return _createAndQueueRequest(data, FakeDOMRequest);
     },
+    getMessage: function(aId) {
+      debug('Called getMessage with id:' + aId);
+    },
+
     /**
       * DOMCursor getMessages(optional MobileMessageFilter filter,
       *                       optional boolean reverse = false);
@@ -84,9 +88,6 @@
     },
     getThreads: function() {
       debug('Called getThreads');
-    },
-    getMessage: function(aId) {
-      debug('Called getMessage with id:' + aId);
     },
     delete: function(aId) {
       debug('Called delete with id:' + aId);
