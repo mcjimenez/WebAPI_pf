@@ -24,7 +24,8 @@
 
     // FIX-ME: Due to the way FakeDOMCursorRequest is implemented, we
     // have to return all the fetched data on a single message
-    var cursor = _sms[operation](...opData);
+    var cursor = (opData && _sms[operation](...opData)) ||
+                 _sms[operation]();
     var _messages = [];
     cursor.onsuccess = function onsuccess() {
       debug(operation + '.cursor.onsuccess: ' + this.done + ', ' +
