@@ -90,6 +90,8 @@
         req.onsuccess = function onsuccess() {
           log('Successful delete msg ' + id + 'result:' +
               JSON.stringify(this.result));
+          log('Trying to retrieve the same msg');
+          testGetMessage();
         };
 
         req.onerror = function onerror() {
@@ -108,10 +110,7 @@
         testSend();
         testGetMessages();
         testGetMessage();
-        log('Delete msg id 1');
         testDelete();
-        log('Trying to retrieved msg 1 again');
-        testGetMessage();
       } catch (e) {
         log("Finished early with " + e);
       }
