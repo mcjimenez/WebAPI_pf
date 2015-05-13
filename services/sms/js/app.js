@@ -16,6 +16,43 @@
 
   var _sms = navigator.mozMobileMessage;
 
+  function buildDOMRequestAnswer(operation, channel, request) {
+    debug('Building call --> ' + JSON.stringify(request));
+    var remotePortId = request.remotePortId;
+    // Params for the local operation:
+    var opData = request.remoteData.data.params;
+    var reqId = request.remoteData.id;
+    //For sending message this will be: (opData.number, opData.txt, opData.options).
+    _sms[operation](...opData).
+      then(successData =>
+           channel.postMessage({
+             remotePortId: remotePortId,
+             data: {
+               id: reqId,
+               data: {
+                 target: {
+                   result: successData
+                 }
+               }
+             }
+           })
+          ).catch(error => channel.postMessage({
+            remotePortId: remotePortId,
+            data: {
+              id: reqId,
+              data: {
+                target: {
+                  error: {
+                    name: error.name,
+                    message: error.message
+                  }
+                }
+              }
+            }
+          })
+      );
+  }
+
   function setHandler(eventType, channel, request) {
 debug('launch setHandler ' + eventType + ', request:' + JSON.stringify(request));
     var reqId = request.remoteData.id;
@@ -73,41 +110,7 @@ debug('load handler for ' + eventType);
   }
 
   var _operations = {
-    send: function(channel, request) {
-      debug('Calling send --> ' + JSON.stringify(request));
-      var remotePortId = request.remotePortId;
-      // Params for the local operation:
-      var opData = request.remoteData.data.params;
-      var reqId = request.remoteData.id;
-      _sms.send(opData.number, opData.txt, opData.options).
-        then(successData =>
-          channel.postMessage({
-            remotePortId: remotePortId,
-            data: {
-              id: reqId,
-              data: {
-                target: {
-                  result: successData
-                }
-              }
-            }
-          })
-        ).catch(error => channel.postMessage({
-          remotePortId: remotePortId,
-          data: {
-            id: reqId,
-            data: {
-              target: {
-                error: {
-                  name: error.name,
-                  message: error.message
-                }
-              }
-            }
-          }
-        })
-      );
-    },
+    send: buildDOMRequestAnswer.bind(this, 'send'),
 
     sendMMS: function(channel, request) {
     },
@@ -156,8 +159,8 @@ debug('load handler for ' + eventType);
       };
     },
 
-    getMessage: function(channel, request) {
-    },
+    getMessage: buildDOMRequestAnswer.bind(this, 'getMessage'),
+
     delete: function(channel, request) {
     },
     markMessageRead: function(channel, request) {

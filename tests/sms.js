@@ -38,6 +38,7 @@
       var _mozSMS = window.navigator.mozMobileMessage;
 
       function testSend() {
+        log('***** TESTING send');
         var recipients = '682681246';
         var content = 'POLYFILL testing message';
         var options = {};
@@ -52,6 +53,7 @@
         });
       }
       function testGetMessages() {
+        log('***** TESTING getMessages');
         var cursor = _mozSMS.getMessages({}, true);
 
         cursor.onsuccess = function onsuccess() {
@@ -69,6 +71,18 @@
         };
       }
 
+      function testGetMessage() {
+        log('***** TESTING getMessage');
+        var id = 1;
+
+        _mozSMS.getMessage(id).then( message => {
+          log('Successful getMessage ' + id + ":" +JSON.stringify(message));
+        }, error => {
+          log('Failed getMessage ' + id + ":" +JSON.stringify(error));
+        });
+      };
+
+
       try {
         log('Starting sms polyfill tests');
         window.navigator.mozMobileMessage ||
@@ -76,8 +90,9 @@
 
         setHandlers(_mozSMS, log);
 
-        //testSend();
+        testSend();
         testGetMessages();
+        testGetMessage();
       } catch (e) {
         log("Finished early with " + e);
       }

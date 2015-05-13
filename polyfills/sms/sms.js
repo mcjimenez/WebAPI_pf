@@ -50,16 +50,21 @@
             ', params:' + JSON.stringify(aOptions));
       var data = {
         operation: 'send',
-        params: {
-          number: aNumber,
-          txt: aTxt,
-          options: aOptions
-        }
+        params: [
+          aNumber,
+          aTxt,
+          aOptions
+        ]
       };
       return _createAndQueueRequest(data, FakeDOMRequest);
     },
+
     getMessage: function(aId) {
       debug('Called getMessage with id:' + aId);
+      return _createAndQueueRequest({
+          operation: 'getMessage',
+          params: [aId]
+        }, FakeDOMRequest);
     },
 
     /**
