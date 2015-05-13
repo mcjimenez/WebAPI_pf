@@ -163,7 +163,8 @@
     })
   );
 
-  debug('exports.navigator.mozMobileMessage:'+(exports.navigator.mozMobileMessage?'existe':'NOOO existe'));
+  debug('exports.navigator.mozMobileMessage: ' +
+        (exports.navigator.mozMobileMessage ? 'exists' : 'not exists'));
 
   exports.navigator.mozMobileMessage = fakeMozMobileMessage;
 

@@ -19,13 +19,12 @@
   function buildDOMCursorAnswer(operation, channel, request) {
     var remotePortId = request.remotePortId;
     // Params for the local operation:
-    var opData = request.remoteData.data.params;
+    var opData = request.remoteData.data.params || [];
     var reqId = request.remoteData.id;
 
     // FIX-ME: Due to the way FakeDOMCursorRequest is implemented, we
     // have to return all the fetched data on a single message
-    var cursor = (opData && _sms[operation](...opData)) ||
-                 _sms[operation]();
+    var cursor = _sms[operation](...opData);
     var _messages = [];
     cursor.onsuccess = function onsuccess() {
       debug(operation + '.cursor.onsuccess: ' + this.done + ', ' +
