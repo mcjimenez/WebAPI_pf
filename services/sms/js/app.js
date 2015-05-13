@@ -165,8 +165,8 @@ debug('load handler for ' + eventType);
 
     delete: buildDOMRequestAnswer.bind(this, 'delete'),
 
-    markMessageRead: function(channel, request) {
-    },
+    markMessageRead: buildDOMRequestAnswer.bind(this, 'markMessageRead'),
+
     retrieveMMS: function(channel, request) {
     },
     getSegmentInfoForText: function(channel, request) {

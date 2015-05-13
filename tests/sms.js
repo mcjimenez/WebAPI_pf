@@ -43,7 +43,6 @@
         var content = 'POLYFILL testing message';
         var options = {};
 
-        log('window.navigator.mozMobileMessage defined!');
         var lock = _mozSMS.send(recipients, content, options);
 
         lock.then(success => {
@@ -124,6 +123,23 @@
         };
       }
 
+      function testMarkMessagesRead() {
+        var id = 1;
+        var isRead = true;
+        var sendReadReport = true;
+
+        var req  = _mozSMS.send(id, isRead, sendReadReport);
+
+        req.onsuccess = function() {
+          log('Successfuly markMsgRead' + JSON.stringify(this.result));
+        };
+        req.onerror = function() {
+          var text = 'Error while marking message ' + id +
+                     ' as read:' + this.error.name;
+          log('Failured markMsgReadsending msg -->' + text);
+        };
+      }
+
       try {
         log('Starting sms polyfill tests');
         window.navigator.mozMobileMessage ||
@@ -136,6 +152,7 @@
         testGetMessage();
         testDelete();
         testGetThreads();
+        testMarkMessagesRead();
       } catch (e) {
         log("Finished early with " + e);
       }

@@ -111,14 +111,29 @@
 
     addEventListener: function(evt, fc) {
       this['on' + evt] = fc;
-    }
+    },
+
+    /**
+     * DOMRequest markMessageRead(long id,
+     *                            boolean read,
+     *                            optional boolean sendReadReport = false);
+     **/
+    markMessageRead: function(aId, aRead, /*optional */sendReadReport) {
+      debug('Called markMessageRead with aid:' + aId +
+            ', read:'+ aRead + ', sendReadReport:' + sendReadReport);
+      return _createAndQueueRequest({
+        operation: 'markMessageRead',
+        params: [
+          aId,
+          aRead,
+          sendReadReport
+        ]
+      }, FakeDOMRequest);
+    },
+
     /*,
     sendMMS: function(aParams) {
       debug('Called sendMMS with params:' + JSON.stringify(aParams));
-    },
-    markMessageRead: function(aId, aReadBool) {
-      debug('Called markMessageRead with aid:' + aId +
-            ', readBool:'+ aReadBool);
     },
     retrieveMMS: function (aId) {
       debug('Called retrieveMMS with id:' + aId);
