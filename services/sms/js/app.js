@@ -125,7 +125,8 @@ debug('load handler for ' + eventType);
 
     retrieveMMS: buildDOMRequestAnswer.bind(this, 'retrieveMMS'),
 
-    getSegmentInfoForText: buildDOMRequestAnswer.bind(this, 'getSegmentInfo')
+    getSegmentInfoForText: buildDOMRequestAnswer.bind(this,
+                                                      'getSegmentInfoForText')
   };
   ['ondeliveryerror', 'ondeliverysuccess', 'onreceived', 'onretrieving',
    'onsent', 'onsending', 'onfailed'].forEach( evt => {
