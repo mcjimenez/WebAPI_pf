@@ -147,11 +147,11 @@
 
         setHandlers(_mozSMS, log);
 
-        testSend();
-        testGetMessages();
+//        testSend();
+//        testGetMessages();
         testGetMessage();
-        testDelete();
-        testGetThreads();
+//        testDelete();
+//        testGetThreads();
         testMarkMessagesRead();
       } catch (e) {
         log("Finished early with " + e);
