@@ -28,7 +28,9 @@ debug('handlerTemplate :'+JSON.stringify(request));
         remotePortId: remotePortId,
         data: {
           id: reqId,
-          data: evt.data
+          data: {
+            event: window.ServiceHelper.cloneObject(evt)
+          }
         }
       });
     }

@@ -5,8 +5,6 @@
     console.log('-*-*- ServHelper: ' + str);
   }
 
-  debug('serv_helper --> loading');
-
   // This is a very basic sample app that uses a SW and acts as a server for
   // navigator.connect. I'm going to mark with a comment where the app MUST
   // add some extra code to use the navigator.connect SHIM
@@ -42,6 +40,22 @@
     });
   };
 
+  // Circular objects will cause this to hang
+  var cloneObject = function(obj) {
+    var cloned = {};
+    for (var key in obj) {
+      if (typeof obj[key] === 'object') {
+        cloned[key] = _cloneObject(obj[key]);
+        continue;
+      }
+
+      if (typeof obj[key] !== 'function' || obj[key] === null) {
+          cloned[key] = obj[key];
+      }
+    }
+    return cloned;
+  };
+
 if ('serviceWorker' in navigator) {
   window.ServiceHelper = {
     register: function(processSWRequest) {
@@ -53,7 +67,8 @@ if ('serviceWorker' in navigator) {
         sw.active && sw.active.postMessage({}, [mc.port2]);
       });
     },
-    unregister: unregister
+    unregister: unregister,
+    cloneObject: cloneObject
   };
 } else {
   debug('APP navigator does not have ServiceWorker');

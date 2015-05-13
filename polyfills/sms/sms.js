@@ -129,7 +129,7 @@
                 data: {
                   operation: handler
                 },
-                processAnswer: answer => cb(answer.data)
+                processAnswer: answer => cb(answer.data.event)
               };
             }
           };
