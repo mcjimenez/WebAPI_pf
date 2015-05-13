@@ -31,7 +31,7 @@
                id: reqId,
                data: {
                  target: {
-                   result: successData
+                   result: window.ServiceHelper.cloneObject(successData)
                  }
                }
              }
@@ -75,40 +75,6 @@ debug('load handler for ' + eventType);
     _sms[eventType] = handlerTemplate;
   };
 
-  function cloneMessage(msg) {
-    // http://mxr.mozilla.org/mozilla-central/source/dom/mobilemessage/interfaces/nsIDOMMozSmsMessage.idl
-    // http://mxr.mozilla.org/mozilla-central/source/dom/mobilemessage/interfaces/nsIDOMMozMmsMessage.idl
-    var newMsg = {};
-    msg.type && (newMsg.type = msg.type);
-    msg.id && (newMsg.id = msg.id);
-    msg.threadId && (newMsg.threadId = msg.threadId);
-    msg.iccId && (newMsg.iccId = msg.iccId);
-    msg.delivery && (newMsg.delivery = msg.delivery);
-    msg.sender && (newMsg.sender = msg.sender);
-    msg.timestamp && (newMsg.timestamp = msg.timestamp);
-    msg.sentTimestamp && (newMsg.sentTimestamp = msg.sentTimestamp);
-    msg.read && (newMsg.read = msg.read);
-
-    // Only in sms
-    msg.deliveryStatus && (newMsg.deliveryStatus = msg.deliveryStatus);
-    msg.receiver && (newMsg.receiver = msg.receiver);
-    msg.body && (newMsg.body = msg.body);
-    msg.messageClass && (newMsg.messageClass = msg.messageClass);
-    msg.deliveryTimestamp && (newMsg.deliveryTimestamp = msg.deliveryTimestamp);
-
-    // Only in mms
-    msg.deliveryInfo && (newMsg.deliveryInfo = msg.deliveryInfo);
-    msg.receivers && (newMsg.receivers = msg.receivers);
-    msg.subject && (newMsg.subject = msg.subject);
-    msg.smil && (newMsg.smil = msg.smil);
-    msg.attachments && (newMsg.attachments = msg.attachments);
-    msg.expiryDate && (newMsg.expiryDate = msg.expiryDate);
-    msg.readReportRequested &&
-      (newMsg.readReportRequested = msg.readReportRequested);
-
-    return newMsg;
-  }
-
   var _operations = {
     send: buildDOMRequestAnswer.bind(this, 'send'),
 
@@ -130,7 +96,7 @@ debug('load handler for ' + eventType);
         debug("getMessages.cursor.onsuccess: " + this.done + ", " +
               JSON.stringify(this.result));
         if (!this.done) {
-          _messages.push(cloneMessage(this.result));
+          _messages.push(window.ServiceHelper.cloneObject(this.result));
           this.continue();
         } else {
           // Send the data back
