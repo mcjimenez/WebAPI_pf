@@ -17,9 +17,12 @@
   var _sms = navigator.mozMobileMessage;
 
   function setHandler(eventType, channel, request) {
+debug('launch setHandler ' + eventType + ', request:' + JSON.stringify(request));
     var remotePortId = request.remotePortId;
 
     function handlerTemplate(evt) {
+ //request.id === request.data.remoteData.id
+debug('handlerTemplate :'+JSON.stringify(request));
       channel.postMessage({
         remotePortId: remotePortId,
         data: {
@@ -28,6 +31,7 @@
         }
       });
     }
+debug('load handler for ' + eventType);
     _sms[eventType] = handlerTemplate;
   };
 
