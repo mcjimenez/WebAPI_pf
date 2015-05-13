@@ -140,6 +140,59 @@
         };
       }
 
+      function testRetrieveMMS() {
+        var id = 1;
+        var req = _mozSMS.retrieveMMS(id);
+
+        req.onsuccess = function() {
+          log('Successful retrieveMMS [' + id + ']: ' +
+              JSON.stringify(this.result));
+        };
+
+        req.onerror = function() {
+          var text = 'Error retrieving mms [' + id +
+                     '].' + this.error.name;
+          log('Failured getMMS. msg -->' + text);
+        };
+      }
+
+      function testGetSegmentInfoForText() {
+        var txt = 'En un lugar de la Mancha, de cuyo nombre no quiero ';
+        txt += 'acordarme, no ha mucho tiempo que vivía un hidalgo de los de ';
+        txt += 'lanza en astillero, adarga antigua, rocín flaco y galgo ';
+        txt += 'corredor. Una olla de algo más vaca que carnero, salpicón las ';
+        txt += 'más noches, duelos y quebrantos los sábados, lantejas los ';
+        txt += 'viernes, algún palomino de añadidura los domingos, consumían ';
+        txt += 'las tres partes de su hacienda. El resto della concluían sayo ';
+        txt += 'de velarte, calzas de velludo para las fiestas, con sus ';
+        txt += 'pantuflos de lo mesmo, y los días de entresemana se honraba ';
+        txt += 'con su vellorí de lo más fino. Tenía en su casa una ama que ';
+        txt += 'pasaba de los cuarenta y una sobrina que no llegaba a los ';
+        txt += 'veinte, y un mozo de campo y plaza que así ensillaba el rocín ';
+        txt += 'como tomaba la podadera. Frisaba la edad de nuestro hidalgo ';
+        txt += 'con los cincuenta años. Era de complexión recia, seco de ';
+        txt += 'carnes, enjuto de rostro, gran madrugador y amigo de la caza. ';
+        txt += 'Quieren decir que tenía el sobrenombre de «Quijada», o ';
+        txt += '«Quesada», que en esto hay alguna diferencia en los autores ';
+        txt += 'que deste caso escriben, aunque por conjeturas verisímiles se ';
+        txt += 'deja entender que se llamaba «Quijana». Pero esto importa poco';
+        txt += ' a nuestro cuento: basta que en la narración dél no se salga ';
+        txt += 'un punto de la verdad.';
+
+        var req = _mozSMS.getSegmentInfoForText(txt);
+
+        req.onsuccess = function() {
+          log('Successful getSegmentInfoForText [<Quijote first paragraph>]: ' +
+              JSON.stringify(this.result));
+        };
+
+        req.onerror = function() {
+          var text = 'Error retrieving mms [<Quijote first paragraph>].' +
+                     this.error.name;
+          log('Failured getMMS. msg -->' + text);
+        };
+      }
+
       try {
         log('Starting sms polyfill tests');
         window.navigator.mozMobileMessage ||
@@ -153,6 +206,8 @@
 //        testDelete();
 //        testGetThreads();
         testMarkMessageRead();
+        testRetrieveMMS();
+        testGetSegmentInfoForText();
       } catch (e) {
         log("Finished early with " + e);
       }

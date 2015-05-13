@@ -131,16 +131,49 @@
       }, FakeDOMRequest);
     },
 
-    /*,
-    sendMMS: function(aParams) {
-      debug('Called sendMMS with params:' + JSON.stringify(aParams));
-    },
     retrieveMMS: function (aId) {
       debug('Called retrieveMMS with id:' + aId);
+      return _createAndQueueRequest({
+          operation: 'retrieveMMS',
+          params: [ aId ]
+        }, FakeDOMRequest);
     },
+
+    /**
+     * Send MMS.
+     *
+     * @param parameters
+     *        A MmsParameters object.
+     * @param sendParameters
+     *        A MmsSendParameters object.
+     *
+     * @return
+     *        A DOMRequest object indicating the sending result.
+     *
+     *   DOMRequest sendMMS(optional MmsParameters parameters,
+     *                      optional MmsSendParameters sendParameters);
+     */
+    sendMMS: function(aParameters, aSendParameters) {
+      debug('Called sendMMS with parameters:' + JSON.stringify(aParameters) +
+            ', and sendParameters:' + JSON.stringify(aSendParameters));
+      return _createAndQueueRequest({
+        operation: 'sendMMS',
+        params: [
+          aParameters,
+          aSendParameters
+        ]
+      }, FakeDOMRequest);
+    },
+
     getSegmentInfoForText: function(aTxt) {
       debug('Called getSegmentInfoForText with text:' + aTxt);
-    }*/
+      return _createAndQueueRequest({
+        operation: 'getSegmentInfoForText',
+        params: [
+          aTxt
+        ]
+      }, FakeDOMRequest);
+    }
   };
 
   var _handlers = {

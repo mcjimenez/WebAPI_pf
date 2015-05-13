@@ -111,66 +111,21 @@ debug('load handler for ' + eventType);
   var _operations = {
     send: buildDOMRequestAnswer.bind(this, 'send'),
 
-    sendMMS: function(channel, request) {
-    },
+    sendMMS: buildDOMRequestAnswer.bind(this, 'sendMMS'),
 
     getThreads: buildDOMCursorAnswer.bind(this, 'getThreads'),
 
     getMessages: buildDOMCursorAnswer.bind(this, 'getMessages'),
-/*
-    getMessages: function(channel, request) {
-      var remotePortId = request.remotePortId;
-      // Params for the local operation:
-      var opData = request.remoteData.data.params;
-      var reqId = request.remoteData.id;
 
-      // FIX-ME: Due to the way FakeDOMCursorRequest is implemented, we
-      // have to return all the fetched data on a single message
-      var cursor = _sms.getMessages(opData.filter, opData.reverse);
-      var _messages = [];
-      cursor.onsuccess = function onsuccess() {
-        debug("getMessages.cursor.onsuccess: " + this.done + ", " +
-              JSON.stringify(this.result));
-        if (!this.done) {
-          _messages.push(window.ServiceHelper.cloneObject(this.result));
-          this.continue();
-        } else {
-          // Send the data back
-
-          channel.postMessage({
-            remotePortId: remotePortId,
-            data: {
-              id: reqId,
-              result: _messages
-            }
-          });
-        }
-      };
-      cursor.onerror = function onerror() {
-        var msg = 'getMessages. Error: ' + this.error.name;
-        debug(msg);
-        channel.postMessage({
-          remotePortId: remotePortId,
-          data: {
-            id: reqId,
-            data: {
-              error: this.error.name
-            }
-          }
-        });
-      };
-    },
-*/
     getMessage: buildDOMRequestAnswer.bind(this, 'getMessage'),
 
     delete: buildDOMRequestAnswer.bind(this, 'delete'),
 
     markMessageRead: buildDOMRequestAnswer.bind(this, 'markMessageRead'),
 
-    retrieveMMS: function(channel, request) {
-    },
-    getSegmentInfoForText: function(channel, request) {
-    }
+    retrieveMMS: buildDOMRequestAnswer.bind(this, 'retrieveMMS'),
+
+    getSegmentInfoForText: buildDOMRequestAnswer.bind(this, 'getSegmentInfo')
   };
   ['ondeliveryerror', 'ondeliverysuccess', 'onreceived', 'onretrieving',
    'onsent', 'onsending', 'onfailed'].forEach( evt => {
