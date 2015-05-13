@@ -62,7 +62,7 @@
     debug('Building call --> ' + JSON.stringify(request));
     var remotePortId = request.remotePortId;
     // Params for the local operation:
-    var opData = request.remoteData.data.params;
+    var opData = request.remoteData.data.params || [];
     var reqId = request.remoteData.id;
     _sms[operation](...opData).
       then(successData =>
