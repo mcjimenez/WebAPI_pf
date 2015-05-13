@@ -26,7 +26,8 @@
     return request;
   }
 
-  var fakeMozMobileMessage = {
+
+  var _smsOps = {
     /**
      * Send SMS.
      *
@@ -45,44 +46,23 @@
      *                  DOMString text,
      *                  optional SmsSendParameters sendParameters);
      */
-    send: function(aNumber, aTxt, aOptions) {
-      debug('Called send with number:' + aNumber + ', text:' + aTxt +
-            ', params:' + JSON.stringify(aOptions));
-
-      return _createAndQueueRequest({
-        operation: 'send',
-        params: [
-          aNumber,
-          aTxt,
-          aOptions
-        ]
-      }, FakeDOMRequest);
-
+    send: {
+      numParams: 3,
+      returnValue: FakeDOMRequest
     },
 
-    getMessage: function(aId) {
-      debug('Called getMessage with id:' + aId);
-      return _createAndQueueRequest({
-          operation: 'getMessage',
-          params: [aId]
-        }, FakeDOMRequest);
+    getMessage: {
+      numParams: 1,
+      returnValue: FakeDOMRequest
     },
 
     /**
       * DOMCursor getMessages(optional MobileMessageFilter filter,
       *                       optional boolean reverse = false);
       **/
-    getMessages: function(aFilter, aReverse) {
-      debug('Called getMessages with filter:' + JSON.stringify(aFilter) +
-            ', reverse:'+ aReverse);
-
-      return _createAndQueueRequest({
-        operation: 'getMessages',
-        params: [
-          aFilter,
-          aReverse
-        ]
-      }, FakeDOMCursorRequest);
+    getMessages: {
+      numParams: 2,
+      returnValue: FakeDOMCursorRequest
     },
 
     /**
@@ -94,23 +74,15 @@
      *  DOMRequest
      *    delete(sequence<(long or MozSmsMessage or MozMmsMessage)> params);
      */
-    delete: function(aId) {
-      debug('Called delete with id:' + aId);
-      return _createAndQueueRequest({
-        operation: 'delete',
-        params: [aId]
-      }, FakeDOMRequest);
+    delete: {
+      numParams: 1,
+      returnValue: FakeDOMRequest
+
     },
 
-    getThreads: function() {
-      debug('Called getThreads');
-      return _createAndQueueRequest({
-        operation: 'getThreads'
-      }, FakeDOMCursorRequest);
-    },
-
-    addEventListener: function(evt, fc) {
-      this['on' + evt] = fc;
+    getThreads: {
+      numParams: 0,
+      returnValue: FakeDOMCursorRequest
     },
 
     /**
@@ -118,25 +90,14 @@
      *                            boolean read,
      *                            optional boolean sendReadReport = false);
      **/
-    markMessageRead: function(aId, aRead, /*optional */sendReadReport) {
-      debug('Called markMessageRead with aid:' + aId +
-            ', read:'+ aRead + ', sendReadReport:' + sendReadReport);
-      return _createAndQueueRequest({
-        operation: 'markMessageRead',
-        params: [
-          aId,
-          aRead,
-          sendReadReport
-        ]
-      }, FakeDOMRequest);
+    markMessageRead: {
+      numParams:3,
+      returnValue: FakeDOMRequest
     },
 
-    retrieveMMS: function (aId) {
-      debug('Called retrieveMMS with id:' + aId);
-      return _createAndQueueRequest({
-          operation: 'retrieveMMS',
-          params: [ aId ]
-        }, FakeDOMRequest);
+    retrieveMMS: {
+      numParams: 1,
+      returnValue: FakeDOMRequest
     },
 
     /**
@@ -153,28 +114,44 @@
      *   DOMRequest sendMMS(optional MmsParameters parameters,
      *                      optional MmsSendParameters sendParameters);
      */
-    sendMMS: function(aParameters, aSendParameters) {
-      debug('Called sendMMS with parameters:' + JSON.stringify(aParameters) +
-            ', and sendParameters:' + JSON.stringify(aSendParameters));
-      return _createAndQueueRequest({
-        operation: 'sendMMS',
-        params: [
-          aParameters,
-          aSendParameters
-        ]
-      }, FakeDOMRequest);
+    sendMMS: {
+      numParams: 2,
+      returnValue: FakeDOMRequest
     },
 
-    getSegmentInfoForText: function(aTxt) {
-      debug('Called getSegmentInfoForText with text:' + aTxt);
-      return _createAndQueueRequest({
-        operation: 'getSegmentInfoForText',
-        params: [
-          aTxt
-        ]
-      }, FakeDOMRequest);
+    getSegmentInfoForText: {
+      numParams: 1,
+      returnValue: FakeDOMRequest
     }
   };
+
+  var fakeMozMobileMessage = {
+
+    addEventListener: function(evt, fc) {
+      this['on' + evt] = fc;
+    }
+
+  };
+
+  function methodCall(methodName, numParams, returnValue) {
+    var params = [];
+    // It's not recommended calling splice on arguments apparently.
+    // Also, first three arguments are explicit
+    for(var i = 3; i < numParams + 3; i++) {
+      params.push(arguments[i]);
+    }
+    debug('Called ' + methodName + ' with ' + JSON.stringify(params));
+      return _createAndQueueRequest({
+        operation: methodName,
+        params: params
+      }, returnValue);
+  }
+
+  for(var _op  in _smsOps) {
+    fakeMozMobileMessage[_op] =
+      methodCall.bind(fakeMozMobileMessage, _op, _smsOps[_op].numParams,
+                     _smsOps[_op].returnValue);
+  }
 
   var _handlers = {
     ondeliveryerror: null,
