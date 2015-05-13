@@ -107,8 +107,8 @@
 
         setHandlers(_mozSMS, log);
 
-        testSend();
-        testGetMessages();
+        //testSend();
+        //testGetMessages();
         testGetMessage();
         testDelete();
       } catch (e) {
