@@ -30,9 +30,7 @@
              data: {
                id: reqId,
                data: {
-                 target: {
-                   result: window.ServiceHelper.cloneObject(successData)
-                 }
+                 result: window.ServiceHelper.cloneObject(successData)
                }
              }
            })
@@ -41,11 +39,9 @@
             data: {
               id: reqId,
               data: {
-                target: {
-                  error: {
-                    name: error.name,
-                    message: error.message
-                  }
+                error: {
+                  name: error.name,
+                  message: error.message
                 }
               }
             }
