@@ -16,6 +16,48 @@
 
   var _sms = navigator.mozMobileMessage;
 
+  function buildDOMCursorAnswer(operation, channel, request) {
+    var remotePortId = request.remotePortId;
+    // Params for the local operation:
+    var opData = request.remoteData.data.params;
+    var reqId = request.remoteData.id;
+
+    // FIX-ME: Due to the way FakeDOMCursorRequest is implemented, we
+    // have to return all the fetched data on a single message
+    var cursor = _sms[operation](...opData);
+    var _messages = [];
+    cursor.onsuccess = function onsuccess() {
+      debug(operation + '.cursor.onsuccess: ' + this.done + ', ' +
+            JSON.stringify(this.result));
+      if (!this.done) {
+        _messages.push(window.ServiceHelper.cloneObject(this.result));
+        this.continue();
+      } else {
+        // Send the data back
+        channel.postMessage({
+          remotePortId: remotePortId,
+          data: {
+            id: reqId,
+            result: _messages
+          }
+        });
+      }
+    };
+    cursor.onerror = function onerror() {
+      var msg = operation + '. Error: ' + this.error.name;
+      debug(msg);
+      channel.postMessage({
+        remotePortId: remotePortId,
+        data: {
+          id: reqId,
+          data: {
+            error: this.error.name
+          }
+        }
+      });
+    };
+  };
+
   function buildDOMRequestAnswer(operation, channel, request) {
     debug('Building call --> ' + JSON.stringify(request));
     var remotePortId = request.remotePortId;
@@ -71,8 +113,11 @@ debug('load handler for ' + eventType);
 
     sendMMS: function(channel, request) {
     },
-    getThreads: function(channel, request) {
-    },
+
+    getThreads: buildDOMCursorAnswer.bind(this, 'getThreads'),
+
+    getMessages: buildDOMCursorAnswer.bind(this, 'getMessages'),
+/*
     getMessages: function(channel, request) {
       var remotePortId = request.remotePortId;
       // Params for the local operation:
@@ -115,7 +160,7 @@ debug('load handler for ' + eventType);
         });
       };
     },
-
+*/
     getMessage: buildDOMRequestAnswer.bind(this, 'getMessage'),
 
     delete: buildDOMRequestAnswer.bind(this, 'delete'),

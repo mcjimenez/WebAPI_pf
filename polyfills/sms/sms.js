@@ -78,12 +78,11 @@
 
       return _createAndQueueRequest({
         operation: 'getMessages',
-        params: {
-          filter: aFilter,
-          reverse: aReverse
-        }
+        params: [
+          aFilter,
+          aReverse
+        ]
       }, FakeDOMCursorRequest);
-
     },
 
     /**
@@ -103,15 +102,19 @@
       }, FakeDOMRequest);
     },
 
+    getThreads: function() {
+      debug('Called getThreads');
+      return _createAndQueueRequest({
+        operation: 'getThreads'
+      }, FakeDOMCursorRequest);
+    },
+
     addEventListener: function(evt, fc) {
       this['on' + evt] = fc;
     }
     /*,
     sendMMS: function(aParams) {
       debug('Called sendMMS with params:' + JSON.stringify(aParams));
-    },
-    getThreads: function() {
-      debug('Called getThreads');
     },
     markMessageRead: function(aId, aReadBool) {
       debug('Called markMessageRead with aid:' + aId +

@@ -100,6 +100,30 @@
         };
       }
 
+      function testGetThreads() {
+        log('***** TESTING getThreads');
+        var cursor;
+        try {
+          cursor = _mozSMS.getThreads();
+        } catch (e) {
+          log('Exception retrieving threads ' + JSON.stringify(e));
+        }
+
+        cursor.onsuccess = function onsuccess() {
+          log("testGetThreads.cursor.onsuccess: " + this.done + ", " +
+              JSON.stringify(this.result));
+          if (!this.done) {
+            this.continue();
+          } else {
+            log("testGetThreads: All done!");
+          }
+        };
+        cursor.onerror = function onerror() {
+          var msg = 'getThreads. Error: ' + this.error.name;
+          log(msg);
+        };
+      }
+
       try {
         log('Starting sms polyfill tests');
         window.navigator.mozMobileMessage ||
@@ -111,6 +135,7 @@
         //testGetMessages();
         testGetMessage();
         testDelete();
+        testGetThreads();
       } catch (e) {
         log("Finished early with " + e);
       }
