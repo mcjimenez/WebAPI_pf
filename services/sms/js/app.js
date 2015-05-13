@@ -22,7 +22,6 @@
     // Params for the local operation:
     var opData = request.remoteData.data.params;
     var reqId = request.remoteData.id;
-    //For sending message this will be: (opData.number, opData.txt, opData.options).
     _sms[operation](...opData).
       then(successData =>
            channel.postMessage({
@@ -119,8 +118,8 @@ debug('load handler for ' + eventType);
 
     getMessage: buildDOMRequestAnswer.bind(this, 'getMessage'),
 
-    delete: function(channel, request) {
-    },
+    delete: buildDOMRequestAnswer.bind(this, 'delete'),
+
     markMessageRead: function(channel, request) {
     },
     retrieveMMS: function(channel, request) {

@@ -82,6 +82,21 @@
         });
       };
 
+      function testDelete() {
+        log('***** TESTING delete');
+        var id = 1;
+
+        var req = _mozSMS.delete(id);
+        req.onsuccess = function onsuccess() {
+          log('Successful delete msg ' + id + 'result:' +
+              JSON.stringify(this.result));
+        };
+
+        req.onerror = function onerror() {
+          var msg = 'Deleting in the database. Error: ' + req.error.name;
+          log('Failed delete msg ' + id + ':' + msg);
+        };
+      }
 
       try {
         log('Starting sms polyfill tests');
@@ -92,6 +107,10 @@
 
         testSend();
         testGetMessages();
+        testGetMessage();
+        log('Delete msg id 1');
+        testDelete();
+        log('Trying to retrieved msg 1 again');
         testGetMessage();
       } catch (e) {
         log("Finished early with " + e);

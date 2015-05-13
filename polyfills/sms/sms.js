@@ -48,15 +48,16 @@
     send: function(aNumber, aTxt, aOptions) {
       debug('Called send with number:' + aNumber + ', text:' + aTxt +
             ', params:' + JSON.stringify(aOptions));
-      var data = {
+
+      return _createAndQueueRequest({
         operation: 'send',
         params: [
           aNumber,
           aTxt,
           aOptions
         ]
-      };
-      return _createAndQueueRequest(data, FakeDOMRequest);
+      }, FakeDOMRequest);
+
     },
 
     getMessage: function(aId) {
@@ -74,14 +75,32 @@
     getMessages: function(aFilter, aReverse) {
       debug('Called getMessages with filter:' + JSON.stringify(aFilter) +
             ', reverse:'+ aReverse);
-      var data = {
+
+      return _createAndQueueRequest({
         operation: 'getMessages',
         params: {
           filter: aFilter,
           reverse: aReverse
         }
-      };
-      return _createAndQueueRequest(data, FakeDOMCursorRequest);
+      }, FakeDOMCursorRequest);
+
+    },
+
+    /**
+     * The parameter can be either a message id, or a Moz{Mms,Sms}Message, or an
+     * array of Moz{Mms,Sms}Message objects
+     *  DOMRequest delete(long id);
+     *  DOMRequest delete(MozSmsMessage message);
+     *  DOMRequest delete(MozMmsMessage message);
+     *  DOMRequest
+     *    delete(sequence<(long or MozSmsMessage or MozMmsMessage)> params);
+     */
+    delete: function(aId) {
+      debug('Called delete with id:' + aId);
+      return _createAndQueueRequest({
+        operation: 'delete',
+        params: [aId]
+      }, FakeDOMRequest);
     },
 
     addEventListener: function(evt, fc) {
@@ -93,9 +112,6 @@
     },
     getThreads: function() {
       debug('Called getThreads');
-    },
-    delete: function(aId) {
-      debug('Called delete with id:' + aId);
     },
     markMessageRead: function(aId, aReadBool) {
       debug('Called markMessageRead with aid:' + aId +
