@@ -1,5 +1,7 @@
 (function(window) {
 
+  'use strict';
+
   // Helper for the common tasks for navigator.connect. This is not strictly
   // needed, but helps to do the things always the same way. That way being:
   // * The client app creates one (or as many as it needs) NavConnectHelper
@@ -106,12 +108,18 @@
     Object.defineProperty(this, 'result', {
       get: function() {
         return _result;
+      },
+      set: function(v) {
+        _result = v;
       }
     });
 
     Object.defineProperty(this, 'error', {
       get: function() {
         return _error;
+      },
+      set: function(e) {
+        _error = e;
       }
     });
 
@@ -174,11 +182,12 @@ console.log('processAnswer --> answer:' + JSON.stringify(answer));
 
     this.continue = function() {
       if (!_done) {
-        _result = _serializedData[_cursor];
+        this.result = _serializedData[_cursor];
         this._fireSuccess();
       }
     };
 
+    // To-do: We should not need to rewrite this
     this._fireSuccess = function() {
       if (!_done) {
         _cursor++;
@@ -188,11 +197,11 @@ console.log('processAnswer --> answer:' + JSON.stringify(answer));
       }
     };
 
-    this._fireError = function(error) {
+    this._fireError = function(aError) {
       if (!_done) {
-        _error = error;
+        this.error = aError;
         this.onerror
-          && typeof this.onerror === 'function' && this.onerror(error);
+          && typeof this.onerror === 'function' && this.onerror(aError);
       }
     };
   }
