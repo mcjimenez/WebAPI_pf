@@ -26,10 +26,11 @@
             JSON.stringify(this.result));
       if (!this.done) {
         if (this.result === undefined) {
-          debug('APP Q ya no hay mas');
+          debug('APP cursor datos undefined');
         } else if (this.result === null) {
-          debug('APP q es nulo');
+          debug('APP cursor datos nulo');
           } else {
+          debug('APP CURsor tiene datos');
         _messages.push(window.ServiceHelper.cloneObject(this.result));
           }
         this.continue();
