@@ -6,6 +6,8 @@
 
 (function(exports) {
 
+  'use strict';
+
   // If it's really available you don't need this
   if (exports.navigator.mozMobileMessage) {
     return;

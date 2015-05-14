@@ -5,15 +5,10 @@
     console.log('SMSService -*-:' + str);
   }
 
-  debug('/services/sms/js/app.js --> loading!!');
-
   // Ok, this kinda sucks because most APIs (and sms is one of them) cannot
   // be accessed from outside the main thread. So basically everything has to go
   // down to the SW thread, then back up here for processing, then back down to
   // be sent to the client. Yay us!
-  var _locks = {};
-  var _observers = {};
-
   var _sms = navigator.mozMobileMessage;
 
   function buildDOMCursorAnswer(operation, channel, request) {
@@ -30,7 +25,13 @@
       debug(operation + '.cursor.onsuccess: ' + this.done + ', ' +
             JSON.stringify(this.result));
       if (!this.done) {
+        if (this.result === undefined) {
+          debug('APP Q ya no hay mas');
+        } else if (this.result === null) {
+          debug('APP q es nulo');
+          } else {
         _messages.push(window.ServiceHelper.cloneObject(this.result));
+          }
         this.continue();
       } else {
         // Send the data back
@@ -51,7 +52,10 @@
         data: {
           id: reqId,
           data: {
-            error: this.error.name
+            error: {
+              name: this.error.name,
+              message: this.error.message
+            }
           }
         }
       });
