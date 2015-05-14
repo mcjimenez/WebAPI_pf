@@ -200,14 +200,14 @@
 
         setHandlers(_mozSMS, log);
 
-        testSend();
+        //testSend();
         testGetMessages();
-        testGetMessage();
-        testDelete();
-        testGetThreads();
-        testMarkMessageRead();
-        testRetrieveMMS();
-        testGetSegmentInfoForText();
+        //testGetMessage();
+        //testDelete();
+        //testGetThreads();
+        //testMarkMessageRead();
+        //testRetrieveMMS();
+        //testGetSegmentInfoForText();
       } catch (e) {
         log("Finished early with " + e);
       }
