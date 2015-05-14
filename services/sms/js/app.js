@@ -25,14 +25,8 @@
       debug(operation + '.cursor.onsuccess: ' + this.done + ', ' +
             JSON.stringify(this.result));
       if (!this.done) {
-        if (this.result === undefined) {
-          debug('APP cursor datos undefined');
-        } else if (this.result === null) {
-          debug('APP cursor datos nulo');
-          } else {
-          debug('APP CURsor tiene datos');
-        _messages.push(window.ServiceHelper.cloneObject(this.result));
-          }
+        this.result &&
+          _messages.push(window.ServiceHelper.cloneObject(this.result));
         this.continue();
       } else {
         // Send the data back
