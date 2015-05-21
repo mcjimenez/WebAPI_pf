@@ -87,7 +87,7 @@
     console.log('*-*-*- TCPSocket PF: ' + text);
   }
 
-  if (window.navigator.mozTCPSocket && window.navigator.mozTCPSocket.open) {
+  if (false && window.navigator.mozTCPSocket && window.navigator.mozTCPSocket.open) {
     // Hmm it's already available... so let's just use it and be done with it
     return;
   }
