@@ -56,7 +56,7 @@
       var button = _domUtils.createElementAt(testButtons, 'button',
                                              { id: testName,
                                                class: 'menu-option'
-                                             }, testName);
+                                             }, testName + "aa");
         button.addEventListener('click', runTest.bind(undefined, testName));
       }
     });
