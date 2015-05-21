@@ -25,6 +25,7 @@
   };
 
   function runTest(serviceToTest) {
+console.log("test " + serviceToTest);
     // When the js loads, window.Tests[xxx] holds a promise
     // that fulfills when the dependencies have been loaded. So...
     window.Tests.log('Testing ' + serviceToTest);
@@ -53,10 +54,10 @@
     Promise.all([confLoaded, allLoaded]).then(values => {
       var testButtons = document.getElementById('test_list');
       for (var testName in values[0]) {
-      var button = _domUtils.createElementAt(testButtons, 'button',
-                                             { id: testName,
-                                               class: 'menu-option'
-                                             }, testName + "aa");
+        var button = _domUtils.createElementAt(testButtons, 'button',
+                                               { id: testName,
+                                                 class: 'menu-option'
+                                               }, testName);
         button.addEventListener('click', runTest.bind(undefined, testName));
       }
     });
