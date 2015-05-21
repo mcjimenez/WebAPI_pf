@@ -5,7 +5,7 @@
   window.Tests['settings'] = {
     dependencies: [
       '/WebAPI_pf/polyfills/common/webapi_poly_common.js',
-      '/WebAPI_pf/polyfills/settings/settings.js'
+      '/WebAPI_pf/polyfills/tcpsocket/tcpsocket.js'
     ],
 
     runTest: function() {

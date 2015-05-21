@@ -27,11 +27,13 @@
   function runTest(serviceToTest) {
     // When the js loads, window.Tests[xxx] holds a promise
     // that fulfills when the dependencies have been loaded. So...
+    window.Test.log('Testing ' + serviceToTest);
     LazyLoader.load([serviceToTest + '.js']).
       then(() =>
            LazyLoader.dependencyLoad(window.Tests[serviceToTest].dependencies),
           e => {
-            window.Tests.log('Main: Error loading ' + serviceToTest + '.js. ' + JSON.stringify(e));
+            window.Tests.log('Main: Error loading ' + serviceToTest + '.js. ' +
+                             JSON.stringify(e));
           }).
       then(() => window.Tests[serviceToTest].runTest());
   }
