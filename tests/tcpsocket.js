@@ -2,7 +2,7 @@
 (function(window) {
   window.Tests = window.Tests || {};
 
-  window.Tests['settings'] = {
+  window.Tests['tcpsocket'] = {
     dependencies: [
       '/WebAPI_pf/polyfills/common/webapi_poly_common.js',
       '/WebAPI_pf/polyfills/tcpsocket/tcpsocket.js'
