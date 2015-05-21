@@ -93,7 +93,7 @@
   }
 
   // Wishful thinking at the moment...
-  const TCPSOCKET_SERVICE = 'https://tcpsocket.gaiamobile.org';
+  const TCPSOCKET_SERVICE = 'https://tcpsocketservice.gaiamobile.org';
 
   function VoidRequest(reqId, extraData) {
     this.serialize = function() {
