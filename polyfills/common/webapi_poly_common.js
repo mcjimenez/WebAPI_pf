@@ -2,6 +2,7 @@
 
   'use strict';
 
+
   // Helper for the common tasks for navigator.connect. This is not strictly
   // needed, but helps to do the things always the same way. That way being:
   // * The client app creates one (or as many as it needs) NavConnectHelper
@@ -24,7 +25,10 @@
       console.log('*-*-* NavConnectHelper: ' + text);
     }
 
-    return new Promise((resolve, reject) => {
+    // It actually makesmore sense having this here...
+    var _currentRequestId = 1;
+
+    var retValue = new Promise((resolve, reject) => {
       // navigator.connect port with the settings service, when the connection
       // is established.
       var _port = null;
@@ -69,6 +73,45 @@
         resolve(realHandler);
       }).catch(error => reject(error));
     });
+
+    retValue.createAndQueueRequest = function(data, constructor) {
+      return this.queueDependentRequest(data, constructor);
+    };
+
+    // Sent a request that depends on another promise (for things that
+    // require a previous object, like setttings locks or sockets).
+    // Basically, waits till 'promise' is fulfilled, set the result as the
+    // 'field' field of 'data', and calls sendObject with that object.
+    retValue.queueDependentRequest = function(data, constructor, promise, field) {
+      Promise.all([this, promise]).then(([navConn, promValue]) => {
+        if (field && promValue) {
+          data[field] = promValue;
+        }
+        var request = new constructor(++_currentRequestId, data);
+        navConn.sendObject(request);
+        return request;
+      });
+    };
+
+    retValue.methodCall = function(options) {
+      var methodName = options.methodName;
+      var numParams = options.numParams;
+      var returnValue = options.returnValue;
+      var params = [];
+      // It's not recommended calling splice on arguments apparently.
+      // Also, first three arguments are explicit
+      for(var i = 1; i < numParams + 1; i++) {
+        params.push(arguments[i]);
+      }
+      debug('Called ' + methodName + ' with ' + JSON.stringify(params));
+      return this.queueDependentRequest({
+        operation: methodName,
+        params: params
+      }, returnValue, options.promise, options.field);
+    };
+
+    return retValue;
+
   }
 
   // This should probably be on a common part...
@@ -163,7 +206,6 @@
         id: reqId,
         data: extraData,
         processAnswer: function(answer) {
-console.log('processAnswer --> answer:' + JSON.stringify(answer));
           if (answer.error) {
             self._fireError(answer.error);
           } else {

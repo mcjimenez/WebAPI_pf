@@ -1,5 +1,6 @@
 {
   "settings": {},
-  "sms": {}
+  "sms": {},
+  "tcpsocket": {"origin": "http://servtcpsocket.github.io"}
 }
 
