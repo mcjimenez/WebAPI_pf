@@ -83,6 +83,7 @@
     // Basically, waits till 'promise' is fulfilled, set the result as the
     // 'field' field of 'data', and calls sendObject with that object.
     retValue.queueDependentRequest = function(data, constructor, promise, field) {
+    debug('queueDependentRequest -> datas' +JSON.stringify(data));
       Promise.all([this, promise]).then(([navConn, promValue]) => {
         if (field && promValue) {
           data[field] = promValue;
