@@ -277,8 +277,11 @@
     //              [optional] in unsigned long byteLength);
     // Synchronous API agh!
     this.send = function(dataToSend, byteOffset, byteLength) {
+      debug('state:' + this.readyState +
+            ', Sending: ' + JSON.stringify(dataToSend));
       // Hmm... can uint8 be sent?
       if (this.readyState !== 'open') {
+        debug('I\m not ready');
         return false;
       }
       navConnPromise.methodCall(

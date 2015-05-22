@@ -26,23 +26,15 @@
         log('Starting test');
         var socket = _mozTCPSocket.open(host, port, options);
 
-        log('A ver q tipo de socket hemos conseguido. ' +
-          socket === undefined ?
-            "undefined" :
-            (socket === null ?
-              "null" :
-              "Has value"));
-
         socket && log('We got a socket!') &&
           (socket.serialize && log('And it\'s fake!')) ||
           abort('And it\'s a real one... Done!');
 
-        log('setting ondata');
         socket.ondata = function(data) {
+          console.log('socket ondata');
           log("Got some data: " + data);
         };
 
-        log('and sending a message');
         socket.send('Hi there');
 
       } catch (e) {
