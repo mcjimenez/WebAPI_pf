@@ -209,7 +209,7 @@
     );
 
     this.serialize = function() {
-      var self = this;
+      //var self = this;
       return {
         id: reqId,
         data: {
