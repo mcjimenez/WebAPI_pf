@@ -30,10 +30,12 @@
           (socket.serialize && log('And it\'s fake!')) ||
           abort('And it\'s a real one... Done!');
 
+        log('setting ondata');
         socket.ondata = function(data) {
           log("Got some data: " + data);
         };
 
+        log('and sending a message');
         socket.send('Hi there');
 
       } catch (e) {
