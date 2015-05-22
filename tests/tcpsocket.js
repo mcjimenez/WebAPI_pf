@@ -30,12 +30,15 @@
           (socket.serialize && log('And it\'s fake!')) ||
           abort('And it\'s a real one... Done!');
 
-        socket.ondata = function(data) {
-          console.log('socket ondata');
-          log("Got some data: " + data);
-        };
+        socket.onopen = function() {
+          log("Socket opened!");
+          socket.ondata = function(data) {
+            console.log('socket ondata');
+            log("Got some data: " + data);
+          };
 
-        socket.send('Hi there');
+          socket.send('Hi there');
+        };
 
       } catch (e) {
         log("Finished early with " + e);
