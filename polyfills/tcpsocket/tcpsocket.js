@@ -89,6 +89,7 @@
 
   if (false && window.navigator.mozTCPSocket && window.navigator.mozTCPSocket.open) {
     // Hmm it's already available... so let's just use it and be done with it
+    debug('TCPSocket it\'s already available');
     return;
   }
 
@@ -113,7 +114,12 @@
           operation: extraData.handler,
           socketId: extraData.socketId
         },
-        processAnswer: answer => extraData.cb(answer.data.event)
+        processAnswer: answer => {
+          for (var kk in answer) {
+            console.log("CCC " + kk + ":" + JSON.stringify(answer[kk]));
+          }
+          extraData.cb(answer.data.event);
+        }
       };
     };
   }
@@ -122,6 +128,8 @@
   function FakeTCPSocket(reqId, extraData) {
     // extraData will hold host, port, options
     // Crude error checking!
+    debug('FakeTCPSocket --> reqId:' + reqId + ', extraData:' + JSON.stringify(extraData));
+
     if (!extraData.host) {
       throw "INVALID_HOST";
     }
@@ -201,7 +209,7 @@
     );
 
     this.serialize = function() {
-      var self= this;
+      var self = this;
       return {
         id: reqId,
         data: {
@@ -209,8 +217,9 @@
           params: [host, port, options]
         },
         processAnswer: function(answer) {
+          debug('Processing answer --> ' + JSON.stringify(answer));
           // This function will be invoked in two cases... when the socket is
-          // created and any time we have to update something...
+          // created and any time we have to update something...tcpsocket
           if (_sockId === null) {
             if (!answer.error) {
               _resolve(answer.socketId);
