@@ -209,7 +209,7 @@
     );
 
     this.serialize = function() {
-      var self = this;
+      var mySelf = this;
       return {
         id: reqId,
         data: {
@@ -223,10 +223,10 @@
           if (_sockId === null) {
             if (!answer.error) {
               _resolve(answer.socketId);
-              //self.readyState = 'open';
+              mySelf.readyState = 'open';
             } else {
               var permaFail = 'Error creating socket: ' + answer.error;
-              this.readyState = 'closed';
+              mySelf.readyState = 'closed';
               _reject(permaFail);
             }
             return;

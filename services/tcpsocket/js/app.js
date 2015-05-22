@@ -63,10 +63,8 @@
   var _operations = {
     open: function(channel, request) {
       var funcData = request.remoteData.data;
-      debug('Opening socket -->' + JSON.stringify(funcData.params));
       _sockets[++_internalSockId] =
         _tcpSocket.open(...funcData.params);
-      debug('and response');
       // And let's assume everything goes well
       answerWith(channel, request, 'socketId', _internalSockId);
     }
