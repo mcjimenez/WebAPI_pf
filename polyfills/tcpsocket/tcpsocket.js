@@ -223,7 +223,7 @@
           if (_sockId === null) {
             if (!answer.error) {
               _resolve(answer.socketId);
-              self.readyState = 'open';
+              //self.readyState = 'open';
             } else {
               var permaFail = 'Error creating socket: ' + answer.error;
               this.readyState = 'closed';
