@@ -217,7 +217,7 @@
           params: [host, port, options]
         },
         processAnswer: function(answer) {
-          debug('Processing answer --> ' + JSON.stringify(answer));
+          console.log('CJC Processing answer --> ' + JSON.stringify(answer));
           // This function will be invoked in two cases... when the socket is
           // created and any time we have to update something...tcpsocket
           if (_sockId === null) {
