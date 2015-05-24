@@ -33,8 +33,8 @@
         socket.onopen = function() {
           log("Socket opened!");
           socket.ondata = function(data) {
-            console.log('socket ondata');
-            log("Got some data: " + data);
+              console.log('socket ondata');
+              log("Got some data: " + JSON.stringify(data));
           };
 
           socket.send('Hi there');
