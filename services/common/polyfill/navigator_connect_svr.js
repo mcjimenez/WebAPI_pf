@@ -10,8 +10,6 @@
     console.log("NC POLYFILL SVR -*- -->" + str);
   }
 
-  debug('navigator_connect_svr --> loading!!');
-
   var cltCount = 0;
 
   var connections = {};
@@ -48,11 +46,10 @@
 
   }
 
-  // Sends a message to the SW shim part. Note that this will be used only for
-  // connections serverPort will hold the IAC port we will use to transmit the
-  // answers on this channel to. Note that at this point the IAC channel is
-  // *not* multiplexed, so there's one IAC channel (and one MessageChannel) per
-  // navigator.connect call.
+  // Sends a message to the SW shim part. Note that this will be used only for connections
+  // serverPort will hold the IAC port we will use to transmit the answers on this
+  // channel to. Note that at this point the IAC channel is *not* multiplexed, so there's
+  // one IAC channel (and one MessageChannel) per navigator.connect call.
   var sendConnectionMessage = function(aMessage, serverPort) {
     return new Promise((resolve, reject) => {
       debug('sendConnectionMessage...' + (aMessage ? JSON.stringify(aMessage):
@@ -105,8 +102,7 @@
           }
         };
 
-        debug('Sending message to the SW: ' +
-              (sw.active?' sw active':'sw NO active'));
+        debug('Sending message to the SW: ' + (sw.active?' sw active':'sw NO active'));
         sw.active && sw.active.postMessage(message, [messageChannel.port2]);
         // We could probably do this earlier...
         serverPort.start();
@@ -155,8 +151,8 @@
 
         // Waits for the first message before sending anything to the service
         // worker.
-        // The first message received will hold the origin URL. This is *not*
-        // secure but IAC does not pass the origin of the IAC messages.
+        // The first message received will hold the origin URL. This is *not* secure
+        // but IAC does not pass the origin of the IAC messages.
         port.onmessage = aMessage => {
           debug('SVR: 1st port.onmessage: ' + JSON.stringify(aMessage) +
                 ', ' + JSON.stringify(aMessage.data));
@@ -173,8 +169,7 @@
       start: function() {
         if (!started) {
           debug('Initializing IAC server');
-          // Yes, it sucks. I'll change it at some point, this shouldn't even be
-          // an object.
+          // Yes, it sucks. I'll change it at some point, this shouldn't even be an object.
           new IAC();
           started = true;
         }
