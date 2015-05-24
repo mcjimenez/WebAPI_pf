@@ -63,6 +63,11 @@
     debug("Setting handler for " + eventType + " for " + socketId + ". R: " + JSON.stringify(request));
 
     function handlerTemplate(evt) {
+      debug("+++GOT AN EVENT " + eventType + " for " + socketId);
+      for(var kk in evt) {
+        console.log("K: " + kk + ". V: " + JSON.stringify(evt[kk]));
+      }
+      debug("---GOT AN EVENT " + eventType + " for " + socketId);
       answerWith(channel, request, 'event',
                  window.ServiceHelper.cloneObject(evt, true));
     }
