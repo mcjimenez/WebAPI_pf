@@ -34,6 +34,10 @@
           log("Socket opened!");
           socket.ondata = function(data) {
               console.log('socket ondata');
+              console.log("++++++++++++++DATA: ");
+              for(var key in data) {
+                console.log("K: " + key + ". V: " + JSON.stringify(data[key]));
+              }
               log("Got some data: " + JSON.stringify(data));
           };
 
