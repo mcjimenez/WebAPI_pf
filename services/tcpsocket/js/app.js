@@ -60,6 +60,7 @@
 
   function setHandler(eventType, channel, request) {
     var socketId = request.remoteData.socketId;
+    debug("Setting handler for " + eventType + " for " + socketId + ". R: " + JSON.stringify(request));
 
     function handlerTemplate(evt) {
       answerWith(channel, request, 'event',
