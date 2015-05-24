@@ -46,32 +46,57 @@
     });
   }
 
+  // There's a good chance of events going out in this process before the
+  // calling process has time to set the event handlers. So we're going to do a
+  // dirty trick here.
+  var _eventQueue = {};
+  function queueEvent(socketId, eventType, event) {
+    debug("Queueing unset event " + eventType + " for " + socketId);
+    _eventQueue[socketId] = _eventQueue[socketId] || {};
+    _eventQueue[socketId][eventType] = _eventQueue[socketId][eventType] || [];
+    _eventQueue[socketId][eventType].push(event);
+  }
+
 
   function setHandler(eventType, channel, request) {
     var socketId = request.remoteData.socketId;
 
     function handlerTemplate(evt) {
       answerWith(channel, request, 'event',
-		 window.ServiceHelper.cloneObject(evt));
+                 window.ServiceHelper.cloneObject(evt));
     }
 
     if (_sockets[socketId]) {
       _sockets[socketId][eventType] = handlerTemplate;
+      if (_eventQueue[socketId] && _eventQueue[socketId][eventType]) {
+        var event;
+        while (event = _eventQueue[socketId][eventType].shift()) {
+          debug("Processing queued event " + eventType + " for " + socketId);
+          handlerTemplate(event);
+        }
+      }
     }
   }
+
+  var _eventTypes = ['onopen', 'ondrain', 'ondata', 'onerror', 'onclose'];
 
   var _operations = {
     open: function(channel, request) {
       var funcData = request.remoteData.data;
       _sockets[++_internalSockId] =
         _tcpSocket.open(...funcData.params);
+      _eventTypes.forEach(eventType => {
+        _sockets[_internalSockId][eventType] =
+          queueEvent.bind(this,
+                          _internalSockId, eventType);
+      });
       // And let's assume everything goes well
       answerWith(channel, request, 'socketId', _internalSockId);
     }
   };
 
-  ['open', 'drain', 'data', 'error', 'close'].forEach(event => {
-    _operations['on' + event] = setHandler.bind(undefined, event);
+  _eventTypes.forEach(event => {
+    _operations[event] = setHandler.bind(undefined, event);
   });
 
   ['send', 'resume', 'close', 'upgradeToSecure'].forEach(op => {
