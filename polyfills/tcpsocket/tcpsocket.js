@@ -118,7 +118,7 @@
           for (var kk in answer) {
             console.log("CCC " + kk + ":" + JSON.stringify(answer[kk]));
           }
-          extraData.cb(answer.data.event);
+          extraData.cb(answer.event);
         }
       };
     };
