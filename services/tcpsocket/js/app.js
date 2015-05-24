@@ -67,6 +67,7 @@
       for(var kk in evt) {
         console.log("K: " + kk + ". V: " + JSON.stringify(evt[kk]));
       }
+      console.log("EVT.DATA: " + evt.data);
       debug("---GOT AN EVENT " + eventType + " for " + socketId);
       answerWith(channel, request, 'event',
                  window.ServiceHelper.cloneObject(evt, true));
