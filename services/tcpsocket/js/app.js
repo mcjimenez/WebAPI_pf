@@ -63,14 +63,18 @@
     debug("Setting handler for " + eventType + " for " + socketId + ". R: " + JSON.stringify(request));
 
     function handlerTemplate(evt) {
-      debug("+++GOT AN EVENT " + eventType + " for " + socketId);
-      Object.keys(evt).forEach(key => 
-        console.log("K: " + key + ". V: " + JSON.stringify(evt[key]))
-      );
-      console.log("EVT.DATA: " + evt.data);
-      debug("---GOT AN EVENT " + eventType + " for " + socketId);
-      answerWith(channel, request, 'event',
-                 window.ServiceHelper.cloneObject(evt, true));
+      // evt is a TCPSocketEvent which has:
+      //   * data
+      //   * target
+      //   * type
+      //   * then => undefined
+      var evtCopy = {
+        data: evt.data,
+        target: socketId,
+        type: evt.type,
+        then: undefined
+      };
+      answerWith(channel, request, 'event', evtCopy);
     }
 
     if (_sockets[socketId]) {
