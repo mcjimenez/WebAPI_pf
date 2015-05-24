@@ -64,7 +64,7 @@
 
     function handlerTemplate(evt) {
       answerWith(channel, request, 'event',
-                 window.ServiceHelper.cloneObject(evt));
+                 window.ServiceHelper.cloneObject(evt, true));
     }
 
     if (_sockets[socketId]) {
