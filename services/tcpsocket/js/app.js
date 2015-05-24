@@ -64,9 +64,9 @@
 
     function handlerTemplate(evt) {
       debug("+++GOT AN EVENT " + eventType + " for " + socketId);
-      for(var kk in evt) {
-        console.log("K: " + kk + ". V: " + JSON.stringify(evt[kk]));
-      }
+      Object.keys(evt).forEach(key => 
+        console.log("K: " + key + ". V: " + JSON.stringify(evt[key]))
+      );
       console.log("EVT.DATA: " + evt.data);
       debug("---GOT AN EVENT " + eventType + " for " + socketId);
       answerWith(channel, request, 'event',
