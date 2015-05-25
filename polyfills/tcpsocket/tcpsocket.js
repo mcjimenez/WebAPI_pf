@@ -87,7 +87,8 @@
     console.log('*-*-*- TCPSocket PF: ' + text);
   }
 
-  if (false && window.navigator.mozTCPSocket && window.navigator.mozTCPSocket.open) {
+  if (false && window.navigator.mozTCPSocket &&
+      window.navigator.mozTCPSocket.open) {
     // Hmm it's already available... so let's just use it and be done with it
     debug('TCPSocket it\'s already available');
     return;
@@ -114,12 +115,7 @@
           operation: extraData.handler,
           socketId: extraData.socketId
         },
-        processAnswer: answer => {
-          for (var kk in answer) {
-            console.log("CCC " + kk + ":" + JSON.stringify(answer[kk]));
-          }
-          extraData.cb(answer.event);
-        }
+        processAnswer: answer => extraData.cb(answer.event)
       };
     };
   }
@@ -128,7 +124,8 @@
   function FakeTCPSocket(reqId, extraData) {
     // extraData will hold host, port, options
     // Crude error checking!
-    debug('FakeTCPSocket --> reqId:' + reqId + ', extraData:' + JSON.stringify(extraData));
+    debug('FakeTCPSocket --> reqId:' + reqId + ', extraData:' +
+          JSON.stringify(extraData));
 
     if (!extraData.host) {
       throw "INVALID_HOST";
@@ -136,6 +133,7 @@
     if (!extraData.port) {
       throw "INVALID_PORT";
     }
+
     var host = extraData.host;
     var port = extraData.port;
     var options = extraData.options;
@@ -209,7 +207,6 @@
     );
 
     this.serialize = function() {
-      //var self = this;
       return {
         id: reqId,
         data: {
@@ -217,17 +214,14 @@
           params: [host, port, options]
         },
         processAnswer: function(answer) {
-          console.log('CJC Processing answer --> error' + JSON.stringify(answer.error));
           // This function will be invoked in two cases... when the socket is
           // created and any time we have to update something...tcpsocket
           if (_sockId === null) {
             if (!answer.error) {
               _resolve(answer.socketId);
-              //self.readyState = 'open';
               _internalProps.readyState = 'open';
             } else {
               var permaFail = 'Error creating socket: ' + answer.error;
-              //self.readyState = 'closed';
               _internalProps.readyState = 'closed';
               _reject(permaFail);
             }
@@ -273,7 +267,7 @@
                                        });
     }
 
-    //  boolean send(in jsval data, [optional] in unsigned long byteOffset,
+    // boolean send(in jsval data, [optional] in unsigned long byteOffset,
     //              [optional] in unsigned long byteLength);
     // Synchronous API agh!
     this.send = function(dataToSend, byteOffset, byteLength) {

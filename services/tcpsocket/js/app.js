@@ -34,7 +34,7 @@
   // could/should be moved to a common file. Just saying, me.
   function answerWith(channel, request, field, data) {
     // This is needed for the answer to be processed automatically by the
-    //  helper.
+    // helper.
     var dataField = {
       id: request.remoteData.id
     };
@@ -51,7 +51,7 @@
   // dirty trick here.
   var _eventQueue = {};
   function queueEvent(socketId, eventType, event) {
-    debug("Queueing unset event " + eventType + " for " + socketId);
+    debug('Queueing unset event ' + eventType + ' for ' + socketId);
     _eventQueue[socketId] = _eventQueue[socketId] || {};
     _eventQueue[socketId][eventType] = _eventQueue[socketId][eventType] || [];
     _eventQueue[socketId][eventType].push(event);
@@ -60,7 +60,6 @@
 
   function setHandler(eventType, channel, request) {
     var socketId = request.remoteData.data.socketId;
-    debug("Setting handler for " + eventType + " for " + socketId + ". R: " + JSON.stringify(request));
 
     function handlerTemplate(evt) {
       // evt is a TCPSocketEvent which has:
@@ -82,7 +81,6 @@
       if (_eventQueue[socketId] && _eventQueue[socketId][eventType]) {
         var event;
         while (event = _eventQueue[socketId][eventType].shift()) {
-          debug("Processing queued event " + eventType + " for " + socketId);
           handlerTemplate(event);
         }
       }
