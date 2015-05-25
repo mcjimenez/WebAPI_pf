@@ -1,4 +1,5 @@
 {
-  "tcpsocket": {"origin": "https://mcjimenez.github.io"}
+  "tcpsocket": {"origin": "https://mcjimenez.github.io"},
+  "systemxhr": {"origin": "https://mcjimenez.github.io"}
 }
 
