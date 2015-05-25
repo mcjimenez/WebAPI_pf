@@ -5,7 +5,7 @@
   window.Tests['systemxhr'] = {
     dependencies: [
       '/WebAPI_pf/polyfills/common/webapi_poly_common.js',
-      '/WebAPI_pf/polyfills/system-xhr/system_xhr.js'
+      '/WebAPI_pf/polyfills/systemxhr/systemxhr.js'
     ],
 
     runTest: function() {
