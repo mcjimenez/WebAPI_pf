@@ -3,7 +3,7 @@
   "name": "SystemXHRService",
   "description": "SystemXHR Service",
   "type": "certified",
-  "launch_path": "/WebAPI_pf/services/system-xhr/index.html",
+  "launch_path": "/WebAPI_pf/services/systemxhr/index.html",
   "icons": {
     "16": "/WebAPI_pf/services/common/style/icons/icon.png",
     "48": "/WebAPI_pf/services/common/style/icons/icon.png",

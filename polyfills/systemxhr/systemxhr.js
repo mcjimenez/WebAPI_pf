@@ -56,45 +56,6 @@
   // Wishful thinking at the moment...
   const SYSTEMXHR_SERVICE = 'https://systemxhrservice.gaiamobile.org';
 
-  function VoidRequest(reqId, extraData) {
-    this.serialize = function() {
-      return {
-        id: reqId,
-        data: extraData,
-        processAnswer: answer => debug('Got an invalid answer for: ' + reqId)
-      };
-    };
-  }
-
-  function OnReadyStateChangeRequest(reqId, extraData) {
-    this.serialize = function() {
-      return {
-        id: reqId,
-        data: extraData,
-        processAnswer: answer => {
-          if (answer.event) {
-            this._updateXMLHttpRequestObject.call(this, answer.event);
-            this.onreadystatechange && this.onreadystatechange(answer.event);
-          }
-        }
-      };
-    };
-  }
-
-  function OnChangeRequest(reqId, extraData) {
-    this.serialize = function() {
-      return {
-        id: reqId,
-        data: extraData,
-        processAnswer: answer => {
-          if (answer.event) {
-            this['_on' + extraData.operation](answer.event);
-          }
-        }
-      };
-    };
-  }
-
   // XMLHttpRequest polyfill..
   function FakeXMLHttpRequest(reqId, extraData) {
 
@@ -107,6 +68,37 @@
     // This will hold the remote object, once the lock is actually created..
     var _xhrId = null;
     _systemxhr.then(id => _xhrId = id);
+    var self = this;
+
+    function OnReadyStateChangeRequest(reqId, extraData) {
+      this.serialize = () => {
+        return {
+          id: reqId,
+          data: extraData,
+          processAnswer: answer => {
+            if (answer.event) {
+              self._updateXMLHttpRequestObject.call(self, answer.event);
+              self.onreadystatechange && self.onreadystatechange(answer.event);
+            }
+          }
+        };
+      };
+    }
+
+    function OnChangeRequest(reqId, extraData) {
+      this.serialize = () => {
+        return {
+          id: reqId,
+          data: extraData,
+          processAnswer: answer => {
+            if (answer.event) {
+              self['_on' + extraData.operation](answer.event);
+            }
+          }
+        };
+      };
+    }
+
 
     function _listenerCallback(evt, cb) {
       this._updateXMLHttpRequestObject.call(this, evt);
@@ -114,11 +106,10 @@
       cb(evt);
     }
 
-    FakeEventTarget.call(listenerCallback.bind(this), _systemxhr);
+    FakeEventTarget.call(_listenerCallback.bind(this), _systemxhr);
 
     this.abort = function() {
-      navConnPromise.methodCall(navConnPromise,
-                               {
+      navConnPromise.methodCall({
                                  methodName: 'abort',
                                  numParams: 0,
                                  returnValue: VoidRequest,
@@ -128,8 +119,7 @@
     };
 
     this.open = function(method, url, async, user, password) {
-      navConnPromise.methodCall(navConnPromise,
-                               {
+      navConnPromise.methodCall({
                                  methodName: 'open',
                                  numParams: 5,
                                  returnValue: VoidRequest,
@@ -139,8 +129,7 @@
     };
 
     this.overrideMimeType = function(mymetype) {
-      navConnPromise.methodCall(navConnPromise,
-                               {
+      navConnPromise.methodCall({
                                  methodName: 'overrideMimeType',
                                  numParams: 1,
                                  returnValue: VoidRequest,
@@ -154,7 +143,7 @@
     this.getResponseHeader = function(header) {
       return this._responseHeaders[header] ?
         this._responseHeaders[header] : null;
-    }
+    };
 
     this.getAllResponseHeaders = function() {
       var headers = '';
@@ -164,15 +153,14 @@
       }
 
       for (var header in this._responseHeaders) {
-        headers += header + ': ' + this._responseHeaders[header] + ' \n'
+        headers += header + ': ' + this._responseHeaders[header] + ' \n';
       }
 
       return headers;
-    }
+    };
 
     this.send = function(data) {
-      navConnPromise.methodCall(navConnPromise,
-                               {
+      navConnPromise.methodCall({
                                  methodName: 'send',
                                  numParams: 1,
                                  returnValue: VoidRequest,
@@ -182,8 +170,7 @@
     };
 
     this.setRequestHeader = function(header, value) {
-      navConnPromise.methodCall(navConnPromise,
-                               {
+      navConnPromise.methodCall({
                                  methodName: 'setRequestHeader',
                                  numParams: 2,
                                  returnValue: VoidRequest,
@@ -218,7 +205,7 @@
       Object.defineProperty(this, property, {
         enumerable: true,
         get: function() {
-          return this['_' + property]
+          return this['_' + property];
         }
       });
     });
@@ -238,7 +225,8 @@
                                  {
                                    methodName: 'onreadystatechange',
                                    numParams: 0,
-                                   returnValue: OnReadyStateChangeRequest,
+                                   returnValue:
+                                      OnReadyStateChangeRequest,
                                    promise: _systemxhr,
                                    field: 'xhrId'
                                  });
@@ -252,8 +240,7 @@
 
     this._onchange = function(changeType, cb) {
       this['_on' + changeType] = cb;
-      navConnPromise.methodCall(navConnPromise,
-                               {
+      navConnPromise.methodCall({
                                  methodName: 'on' + changeType,
                                  numParams: 0,
                                  returnValue: OnChangeRequest,
@@ -298,12 +285,7 @@
       };
     };
 
-    // We need to set up this listener to update the attributes properly
-    navConnPromise.then(navConnHelper => {
-      // We should send this message ASAP
-      this._onreadystatechange();
-      navConnHelper.sendObject(this);
-    });
+    this._onreadystatechange();
   }
 
   function FakeXMLHttpRequestUpload() {
@@ -342,7 +324,7 @@
 
   window.XMLHttpRequest = XMLHttpRequestShim;
 
-  navConnPromise.then(function(){}, e => {
+  navConnPromise.then(function() {}, e => {
     debug('Got an exception while connecting ' + e);
     window.XMLHttpRequest = realXMLHttpRequest;
   });
@@ -378,7 +360,7 @@
       };
     }
 
-    function Dispatcher(reqId, extraData event) {
+    function Dispatcher(reqId, extraData) {
       this.serialize = function() {
         return {
           id: reqId,
@@ -402,7 +384,7 @@
 
         data[field] = value;
         navConnPromise.createAndQueueRequest(data, Listener);
-      })
+      });
     };
 
     this.removeEventListener = function(type, cb) {
