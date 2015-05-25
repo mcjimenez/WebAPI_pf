@@ -90,43 +90,16 @@
   if (false && window.navigator.mozTCPSocket &&
       window.navigator.mozTCPSocket.open) {
     // Hmm it's already available... so let's just use it and be done with it
-    debug('TCPSocket it\'s already available');
     return;
   }
 
   // Wishful thinking at the moment...
   const TCPSOCKET_SERVICE = 'https://tcpsocketservice.gaiamobile.org';
 
-  function VoidRequest(reqId, extraData) {
-    this.serialize = function() {
-      return {
-        id: reqId,
-        data: extraData,
-        processAnswer: answer => debug("Got an invalid answer for: " + reqId)
-      };
-    };
-  }
-
-  function HandlerSetRequest(reqId, extraData) {
-    this.serialize = function() {
-      return {
-        id: reqId,
-        data: {
-          operation: extraData.handler,
-          socketId: extraData.socketId
-        },
-        processAnswer: answer => extraData.cb(answer.event)
-      };
-    };
-  }
-
   // TCPSocket polyfill..
   function FakeTCPSocket(reqId, extraData) {
     // extraData will hold host, port, options
     // Crude error checking!
-    debug('FakeTCPSocket --> reqId:' + reqId + ', extraData:' +
-          JSON.stringify(extraData));
-
     if (!extraData.host) {
       throw "INVALID_HOST";
     }
@@ -215,7 +188,7 @@
         },
         processAnswer: function(answer) {
           // This function will be invoked in two cases... when the socket is
-          // created and any time we have to update something...tcpsocket
+          // created and any time we have to update something...
           if (_sockId === null) {
             if (!answer.error) {
               _resolve(answer.socketId);
@@ -271,11 +244,9 @@
     //              [optional] in unsigned long byteLength);
     // Synchronous API agh!
     this.send = function(dataToSend, byteOffset, byteLength) {
-      debug('state:' + this.readyState +
-            ', Sending: ' + JSON.stringify(dataToSend));
       // Hmm... can uint8 be sent?
       if (this.readyState !== 'open') {
-        debug('I\m not ready');
+        debug('I\'m not ready');
         return false;
       }
       navConnPromise.methodCall(

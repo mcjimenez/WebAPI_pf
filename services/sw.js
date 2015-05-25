@@ -7,10 +7,9 @@
 // ADDED FOR POLYFILL
 
 function debug(str) {
-  console.log('Service SW -*- -->' + str);
+  console.log('Setting Service SW -*- -->' + str);
 }
 
-debug('sw.js --> loading');
 // ADDED FOR POLYFILL: Import the polyfill script
 this.
   importScripts('/WebAPI_pf/services/common/polyfill/navigator_connect_sw.js');
@@ -71,9 +70,7 @@ this.onconnect = function(msg) {
       // Since this doesn't work the first time, and we don't want to have to
       // do a reload, we'll work around this by making the main thread pass
       // us a MessageChannel to talk to it
-      debug('sending msg from sw to app');
       this.channelToMT.then(channel => {
-        debug('We have channel --> postMessage');
         // TO-DO: Multiplex the channel!
         channel.postMessage({remotePortId: myPortId, remoteData: aMsg.data});
       });

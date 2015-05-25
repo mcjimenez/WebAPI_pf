@@ -85,7 +85,6 @@
     retValue.queueDependentRequest = function(data, constructor, promise,
                                               field) {
       var request = new constructor(++_currentRequestId, data);
-      debug('queueDependentRequest -> datas:' +JSON.stringify(data));
       Promise.all([this, promise]).then(([navConn, promValue]) => {
         if (field && promValue) {
           data[field] = promValue;
@@ -105,7 +104,6 @@
       for(var i = 1; i < numParams + 1; i++) {
         params.push(arguments[i]);
       }
-      debug('Called ' + methodName + ' with ' + JSON.stringify(params));
       return this.queueDependentRequest({
         operation: methodName,
         params: params
@@ -113,7 +111,6 @@
     };
 
     return retValue;
-
   }
 
   // This should probably be on a common part...
@@ -239,7 +236,8 @@
         _cursor++;
         _done = _cursor > _serializedData.length ? true : false;
         this.onsuccess &&
-          typeof this.onsuccess === 'function' && this.onsuccess();
+          typeof this.onsuccess === 'function' &&
+          this.onsuccess({target: this});
       }
     };
 
@@ -252,6 +250,34 @@
     };
   }
 
+  function HandlerSetRequest(reqId, extraData) {
+    this.serialize = function() {
+      return {
+        id: reqId,
+        data: {
+          operation: extraData.handler,
+          socketId: extraData.socketId
+        },
+        processAnswer: answer => extraData.cb(answer.event)
+      };
+    };
+  }
+
+  function VoidRequest(reqId, extraData) {
+    function debug(text) {
+      console.log('*-*-* VoidRequest: ' + text);
+    }
+    this.serialize = function() {
+      return {
+        id: reqId,
+        data: extraData,
+        processAnswer: answer => debug('Got an invalid answer for: ' + reqId)
+      };
+    };
+  }
+
+  window.VoidRequest = VoidRequest;
+  window.HandlerSetRequest = HandlerSetRequest;
   window.NavConnectHelper = NavConnectHelper;
   window.FakeDOMRequest = FakeDOMRequest;
   window.FakeDOMCursorRequest = FakeDOMCursorRequest;
