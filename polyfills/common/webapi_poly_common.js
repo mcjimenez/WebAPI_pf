@@ -173,7 +173,8 @@
         _fired = true;
         _resolve(result);
         this.onsuccess &&
-          typeof this.onsuccess === 'function' && this.onsuccess();
+          typeof this.onsuccess === 'function' &&
+          this.onsuccess({target: this});
       }
     };
 
