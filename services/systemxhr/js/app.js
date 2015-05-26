@@ -98,6 +98,12 @@
 
     setRequestHeader: executeOperation.bind(this, 'setRequestHeader'),
 
+    set: function(channel, request) {
+      var xhrId = request.remoteData.data.xhrId;
+      var opData = request.remoteData.data.params;
+      _XMLHttpRequests[xhrId][opData[0]] = options[1];
+    },
+
     addEventListener: addEventTargetEvent.bind(this),
 
     removeEventListener: function(channel, request) {

@@ -196,6 +196,13 @@
         },
         set: function(value) {
           this['_' + property] = value;
+          navConnHelper.methodCall({
+                                    methodName: 'set',
+                                    numParams: 2,
+                                    returnValue: VoidRequest,
+                                    promise: _systemxhr,
+                                    field: 'xhrId'
+                                  }, property, value);
         }
       });
     });
