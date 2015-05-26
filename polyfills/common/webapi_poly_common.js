@@ -375,7 +375,22 @@
     };
   }
 
+  function OnChangeRequest(reqId, extraData) {
+    this.serialize = () => {
+      return {
+        id: reqId,
+        data: extraData,
+        processAnswer: answer => {
+          if (answer.event) {
+            extraData.callback(answer.event);
+          }
+        }
+      };
+    };
+  }
+
   window.VoidRequest = VoidRequest;
+  window.OnChangeRequest = OnChangeRequest;
   window.HandlerSetRequest = HandlerSetRequest;
   window.NavConnectHelper = NavConnectHelper;
   window.FakeDOMRequest = FakeDOMRequest;
