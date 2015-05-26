@@ -20,7 +20,7 @@
         var _mozTCPSocket = window.navigator.mozTCPSocket;
 
         log('window.navigator.mozTCPSocket defined!');
-        var host = '192.168.1.234';
+        var host = '192.168.1.233';
         var port = 12345;
         var options = {binaryType: 'arraybuffer'};
         log('Starting test');
