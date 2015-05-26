@@ -12,30 +12,27 @@
   var _XMLHttpRequests = {};
   var _listeners = {};
 
-  var onChangeEvents = [
-      'onabort',
-      'onerror',
-      'onload',
-      'onloadend',
-      'onloadstart',
-      'onprogress',
-      'ontimeout',
-      'onreadystatechange'
-    ];
+  function buildDOMRequestAnswer(channel, request) {
+    debug('Building call --> ' + JSON.stringify(request));
+    var remotePortId = request.remotePortId;
+    var reqId = request.remoteData.id;
+    var requestOp = request.remoteData.data;
+    _XMLHttpRequests[reqId] = new XMLHttpRequest(requestOp.options);
+    // Let's assume this works always...
+    channel.postMessage({remotePortId: remotePortId, data: {id: reqId}});
+  }
 
-  var processSWRequest = function(channel, evt) {
-    // We can get:
-    // * methodName
-    // * onpropertychange
-    // * createXMLHttpRequest
-    // * addEventListener
-    // * removeEventListener
-    // * dispatchEvent
-    // All the operations have a requestId, and all the operations over
-    // a XMLHttpRequest also include a xhr id.
-    var remotePortId = evt.data.remotePortId;
-    var request = evt.data.remoteData;
-    var requestOp = request.data;
+  function executeOperation(operation, channel, request) {
+    // Params for the local operation:
+    var opData = request.remoteData.data.params || [];
+    var xhrId = request.remoteData.data.xhrId;
+    _XMLHttpRequests[xhrId][operation](...opData);
+  }
+
+  function setHandler(eventType, channel, request) {
+    var remotePortId = request.remotePortId;
+    var reqId = request.remoteData.id;
+    var xhrId = request.remoteData.data.xhrId;
 
     function _buildResponseHeadersObject(responseHeaders) {
       var headers = responseHeaders.split(/\n/);
@@ -51,38 +48,113 @@
       return obj;
     }
 
-    function listenerTemplate(evt) {
+    function onChangeTemplate(evt) {
       var clonedEvent = window.ServiceHelper.cloneObject(evt, true);
       clonedEvent.responseHeaders =
         _buildResponseHeadersObject(evt.target.getAllResponseHeaders());
       channel.postMessage({
         remotePortId: remotePortId,
         data: {
-          id: request.id,
+          id: reqId,
           event: clonedEvent
         }
       });
     }
 
-    if (requestOp.operation === 'createXMLHttpRequest') {
-      _XMLHttpRequests[request.id] = new XMLHttpRequest(requestOp.options);
-      // Let's assume this works always...
-      channel.postMessage({remotePortId: remotePortId, data: {id: request.id}});
-    } else if (onChangeEvents.indexOf(requestOp.operation) !== -1) {
-      _XMLHttpRequests[requestOp.xhrId][requestOp.operation] = listenerTemplate;
-    } else if (requestOp.operation === 'addEventListener') {
-      _listeners[request.id] = listenerTemplate;
-      _XMLHttpRequests[requestOp.xhrId].
-        addEventListener(requestOp.type, _listeners[request.id],
-        requestOp.useCapture);
-    } else if (requestOp.operation === 'removeEventListener') {
-      _XMLHttpRequests[requestOp.xhrId].removeObserver
-        (_listeners[requestOp.listenerId]);
-    } else if (requestOp.operation === 'dispatchEvent') {
-      _XMLHttpRequests[requestOp.xhrId].dispatchEvent(requestOp.event);
+    _XMLHttpRequests[xhrId][eventType] = onChangeTemplate;
+  };
+
+  function addEventTargetEvent(channel, request) {
+    var requestOp = request.remoteData.data;
+    var reqId = request.remoteData.id;
+    var xhrId = request.remoteData.data.xhrId;
+
+    function listenerTemplate(evt) {
+      channel.postMessage({
+        remotePortId: remotePortId,
+        data: {
+          id: reqId,
+          event: window.ServiceHelper.cloneObject(evt, true)
+        }
+      });
+    }
+
+    _listeners[reqId] = listenerTemplate;
+    _XMLHttpRequests[xhrId].addEventListener(requestOp.type,
+      _listeners[reqId], requestOp.useCapture);
+  }
+
+  var _operations = {
+    createXMLHttpRequest: buildDOMRequestAnswer.bind(this),
+
+    abort: executeOperation.bind(this, 'abort'),
+
+    open: executeOperation.bind(this, 'open'),
+
+    overrideMimeType: executeOperation.bind(this, 'overrideMimeType'),
+
+    send: executeOperation.bind(this, 'send'),
+
+    setRequestHeader: executeOperation.bind(this, 'setRequestHeader'),
+
+    set: function(channel, request) {
+      var xhrId = request.remoteData.data.xhrId;
+      var opData = request.remoteData.data.params;
+      _XMLHttpRequests[xhrId][opData[0]] = opData[1];
+    },
+
+    addEventListener: addEventTargetEvent.bind(this),
+
+    removeEventListener: function(channel, request) {
+      var requestOp = request.remoteData.data;
+      var xhrId = request.remoteData.data.xhrId;
+      _XMLHttpRequests[xhrId].removeObserver(_listeners[requestOp.listenerId]);
+    },
+
+    dispatchEvent: function(channel, request) {
+      var requestOp = request.remoteData.data;
+      var xhrId = request.remoteData.data.xhrId;
+      _XMLHttpRequests[xhrId].dispatchEvent(requestOp.event);
+    }
+  };
+  ['onabort', 'onerror', 'onload', 'onloadend', 'onloadstart', 'onprogress',
+    'ontimeout', 'onreadystatechange'].forEach( evt => {
+      _operations[evt] = setHandler.bind(undefined, evt);
+  });
+
+  var processSWRequest = function(aAcl, aChannel, aEvt) {
+    // We can get:
+    // * methodName
+    // * onpropertychange
+    // * createXMLHttpRequest
+    // * addEventListener
+    // * removeEventListener
+    // * dispatchEvent
+    // All the operations have a requestId, and all the operations over
+    // a XMLHttpRequest also include a xhr id.
+    var request = aEvt.data.remoteData;
+    var requestOp = request.data.operation;
+    var targetURL = aEvt.data.targetURL;
+
+    // TODO: Add resource access constraint
+    // It should return true if resource access is forbidden,
+    // false if it's allowed
+    var forbidCall = function(constraints) {
+      return false;
+    };
+
+    if (window.ServiceHelper.isForbidden(aAcl, targetURL, requestOp,
+                                         forbidCall)) {
+      return;
+    }
+
+    debug('processSWRequest --> processing a msg:' +
+          (aEvt.data ? JSON.stringify(aEvt.data): 'msg without data'));
+    if (requestOp in _operations) {
+      _operations[requestOp] &&
+        _operations[requestOp](aChannel, aEvt.data);
     } else {
-      _XMLHttpRequests[requestOp.xhrId][requestOp.operation]
-        (...requestOp.params);
+      console.error('SystemXHR service unknown operation:' + requestOp);
     }
   };
 

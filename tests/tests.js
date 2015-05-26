@@ -31,8 +31,7 @@
       then(() =>
            LazyLoader.dependencyLoad(window.Tests[serviceToTest].dependencies),
           e => {
-            window.Tests.log('Main: Error loading ' + serviceToTest + '.js. ' +
-                             JSON.stringify(e));
+            window.Tests.log('Main: Error loading ' + serviceToTest + '.js. ' + JSON.stringify(e));
           }).
       then(() => window.Tests[serviceToTest].runTest());
   }
@@ -52,10 +51,10 @@
     Promise.all([confLoaded, allLoaded]).then(values => {
       var testButtons = document.getElementById('test_list');
       for (var testName in values[0]) {
-        var button = _domUtils.createElementAt(testButtons, 'button',
-                                               { id: testName,
-                                                 class: 'menu-option'
-                                               }, testName);
+      var button = _domUtils.createElementAt(testButtons, 'button',
+                                             { id: testName,
+                                               class: 'menu-option'
+                                             }, testName);
         button.addEventListener('click', runTest.bind(undefined, testName));
       }
     });

@@ -37,8 +37,8 @@
 
       var _mozSMS = window.navigator.mozMobileMessage;
 
-      function testSend() {
-        log('***** TESTING send');
+      function testSend(silent, cb) {
+        !silent && log('***** TESTING send');
         var recipients = '682681246';
         var content = 'POLYFILL testing message';
         var options = {};
@@ -46,33 +46,42 @@
         var lock = _mozSMS.send(recipients, content, options);
 
         lock.then(success => {
-          log('Successfuly sent msg' + JSON.stringify(success));
+          !silent && log('Successfuly sent msg' + JSON.stringify(success));
+          cb && cb();
         }).catch(error => {
           log('Failured sending msg' + JSON.stringify(error));
         });
       }
-      function testGetMessages() {
-        log('***** TESTING getMessages');
-        var cursor = _mozSMS.getMessages({}, true);
 
-        cursor.onsuccess = function onsuccess() {
-          log("testGetMessages.cursor.onsuccess: " + this.done + ", " +
-              JSON.stringify(this.result));
-          if (!this.done) {
-            this.continue();
-          } else {
-            log("testGetMessages: All done!");
-          }
-        };
-        cursor.onerror = function onerror() {
-          var msg = 'getMessages. Error: ' + this.error.name;
-          log(msg);
-        };
+      function testGetMessages(silent) {
+        return new Promise((resolve, reject) => {
+          var results = [];
+          !silent && log('***** TESTING getMessages');
+          var cursor = _mozSMS.getMessages({}, true);
+
+          cursor.onsuccess = function onsuccess() {
+            !silent &&
+                log("testGetMessages.cursor.onsuccess: " + this.done + ", " +
+                JSON.stringify(this.result));
+            if (!this.done) {
+              results.push(this.result);
+              this.continue();
+            } else {
+              !silent && log("testGetMessages: All done!");
+              resolve(results);
+            }
+          };
+          cursor.onerror = function onerror() {
+            var msg = 'getMessages. Error: ' + this.error.name;
+            !silent && log(msg);
+            reject();
+          };
+        });
       }
 
-      function testGetMessage() {
+      function testGetMessage(aId) {
         log('***** TESTING getMessage');
-        var id = 1;
+        var id = aId || 1;
 
         _mozSMS.getMessage(id).then( message => {
           log('Successful getMessage ' + id + ":" +JSON.stringify(message));
@@ -82,21 +91,26 @@
       };
 
       function testDelete() {
-        log('***** TESTING delete');
-        var id = 1;
+        function execDelete() {
+          log('***** TESTING delete');
+          testGetMessages(true).then(smss => {
+            log('We\'re goingt to delete this sms: ' + JSON.stringify(smss[0]));
+            var id = smss[0].id;
+            var req = _mozSMS.delete(id);
+            req.onsuccess = function onsuccess() {
+              log('Successful delete msg ' + id + 'result:' +
+                  JSON.stringify(this.result));
+              log('Trying to retrieve the same msg');
+              testGetMessage(id);
+            };
 
-        var req = _mozSMS.delete(id);
-        req.onsuccess = function onsuccess() {
-          log('Successful delete msg ' + id + 'result:' +
-              JSON.stringify(this.result));
-          log('Trying to retrieve the same msg');
-          testGetMessage();
-        };
-
-        req.onerror = function onerror() {
-          var msg = 'Deleting in the database. Error: ' + req.error.name;
-          log('Failed delete msg ' + id + ':' + msg);
-        };
+            req.onerror = function onerror() {
+              var msg = 'Deleting in the database. Error: ' + req.error.name;
+              log('Failed delete msg ' + id + ':' + msg);
+            };
+          });
+        }
+        testSend(true, execDelete);
       }
 
       function testGetThreads() {
@@ -200,14 +214,14 @@
 
         setHandlers(_mozSMS, log);
 
-        //testSend();
+        testSend();
         testGetMessages();
-        //testGetMessage();
-        //testDelete();
-        //testGetThreads();
-        //testMarkMessageRead();
-        //testRetrieveMMS();
-        //testGetSegmentInfoForText();
+        testGetMessage();
+        testDelete();
+        testGetThreads();
+        testMarkMessageRead();
+        testRetrieveMMS();
+        testGetSegmentInfoForText();
       } catch (e) {
         log("Finished early with " + e);
       }

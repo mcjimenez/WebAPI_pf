@@ -31,7 +31,7 @@
           if (newXHR.status === 200) {
             if (newXHR.response)
               log ('We got a response: ' + JSON.stringify(newXHR.response));
-              if (Object.keys(newXHR.response).length() > 0) {
+              if (Object.keys(JSON.parse(newXHR.response)).length > 0) {
                 log('And it has data');
               } else {
                 log('but it has not data');

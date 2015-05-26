@@ -6,8 +6,6 @@
 // * Each request will have a numeric request id, set by the client
 // * The answers will include the request id, so the client can know to which
 //   request the answer corresponds
-// * The request id will also act as identifier for remote objects (locks and
-//  observers!)
 
 // createXMLHttpRequest =>
 //   * Request: { id: requestId,
@@ -38,7 +36,8 @@
 //             operation: 'addEventListener|removeEventListener|dispatchEvent',
 //             type: eventType (only addEventListener and removeEventListener),
 //             useCapture: true|false (only addEventListener),
-//             event: eventToDispatch (only dispatchEvent)
+//             event: eventToDispatch (only dispatchEvent),
+//             cb: callback
 //           },
 // Answer: When invoked:
 //    { id: requestId,
@@ -77,7 +76,7 @@
           data: extraData,
           processAnswer: answer => {
             if (answer.event) {
-              self._updateXMLHttpRequestObject.call(self, answer.event);
+              self._updateXMLHttpRequestObject(answer.event);
               self.onreadystatechange && self.onreadystatechange(answer.event);
             }
           }
@@ -92,7 +91,7 @@
           data: extraData,
           processAnswer: answer => {
             if (answer.event) {
-              self['_on' + extraData.operation](answer.event);
+              self['_' + extraData.operation](answer.event);
             }
           }
         };
@@ -106,37 +105,45 @@
       cb(evt);
     }
 
-    FakeEventTarget.call(_listenerCallback.bind(this), _systemxhr);
+    FakeEventTarget.call(this, navConnHelper, _listenerCallback.bind(this),
+      'xhrId', _systemxhr);
 
-    this.abort = function() {
-      navConnPromise.methodCall({
-                                 methodName: 'abort',
-                                 numParams: 0,
-                                 returnValue: VoidRequest,
-                                 promise: _systemxhr,
-                                 field: 'xhrId'
-                               });
-    };
-
-    this.open = function(method, url, async, user, password) {
-      navConnPromise.methodCall({
-                                 methodName: 'open',
-                                 numParams: 5,
-                                 returnValue: VoidRequest,
-                                 promise: _systemxhr,
-                                 field: 'xhrId'
-                               }, method, url, async, user, password);
-    };
-
-    this.overrideMimeType = function(mymetype) {
-      navConnPromise.methodCall({
-                                 methodName: 'overrideMimeType',
-                                 numParams: 1,
-                                 returnValue: VoidRequest,
-                                 promise: _systemxhr,
-                                 field: 'xhrId'
-                               }, mymetype);
-    };
+    [{
+      method: 'abort',
+      numParams: 0,
+    },
+    {
+      method: 'open',
+      numParams: 5,
+    },
+    {
+      method: 'overrideMimeType',
+      numParams: 1,
+    },
+    {
+      method: 'send',
+      numParams: 1,
+    },
+    {
+      method: 'setRequestHeader',
+      numParams: 2,
+    },
+    {
+      objectMethod: '_onreadystatechange',
+      method: 'onreadystatechange',
+      numParams: 0,
+      returnValue: OnReadyStateChangeRequest,
+    }].forEach(methodInfo => {
+      var method = methodInfo.objectMethod || methodInfo.method;
+      this[method] = navConnHelper.methodCall.bind(navConnHelper,
+        {
+          methodName: methodInfo.method,
+          numParams: methodInfo.numParams,
+          returnValue: methodInfo.returnValue || VoidRequest,
+          promise: _systemxhr,
+          field: 'xhrId'
+        });
+    });
 
     // Null if no response has been received yet
     this._responseHeaders = null;
@@ -159,26 +166,6 @@
       return headers;
     };
 
-    this.send = function(data) {
-      navConnPromise.methodCall({
-                                 methodName: 'send',
-                                 numParams: 1,
-                                 returnValue: VoidRequest,
-                                 promise: _systemxhr,
-                                 field: 'xhrId'
-                               }, data);
-    };
-
-    this.setRequestHeader = function(header, value) {
-      navConnPromise.methodCall({
-                                 methodName: 'setRequestHeader',
-                                 numParams: 2,
-                                 returnValue: VoidRequest,
-                                 promise: _systemxhr,
-                                 field: 'xhrId'
-                               }, header, value);
-    };
-
     var readyStates = [
       {property: 'UNSENT', value: 0},
       {property: 'OPENED', value: 1},
@@ -196,16 +183,26 @@
 
     this.upload = new FakeXMLHttpRequestUpload();
 
-    var readOnlyProperties = [
+    var properties = [
       'response', 'responseText', 'responseType', 'responseXML',
       'status', 'statusText', 'readyState',' timeout', 'responseURL'
     ];
 
-    readOnlyProperties.forEach(property => {
+    properties.forEach(property => {
       Object.defineProperty(this, property, {
         enumerable: true,
         get: function() {
           return this['_' + property];
+        },
+        set: function(value) {
+          this['_' + property] = value;
+          navConnHelper.methodCall({
+                                    methodName: 'set',
+                                    numParams: 2,
+                                    returnValue: VoidRequest,
+                                    promise: _systemxhr,
+                                    field: 'xhrId'
+                                  }, property, value);
         }
       });
     });
@@ -220,19 +217,8 @@
       }
     });
 
-    // Need to listen to readyState events even if the callback is not defined
-    this._onreadystatechange = navConnPromise.methodCall.bind(navConnPromise,
-                                 {
-                                   methodName: 'onreadystatechange',
-                                   numParams: 0,
-                                   returnValue:
-                                      OnReadyStateChangeRequest,
-                                   promise: _systemxhr,
-                                   field: 'xhrId'
-                                 });
-
     this._updateXMLHttpRequestObject = function(evt) {
-      readOnlyProperties.forEach(property => {
+      properties.forEach(property => {
         this['_' + property] = evt.target[property];
       });
       this['_responseHeaders'] = evt.responseHeaders;
@@ -240,7 +226,7 @@
 
     this._onchange = function(changeType, cb) {
       this['_on' + changeType] = cb;
-      navConnPromise.methodCall({
+      navConnHelper.methodCall({
                                  methodName: 'on' + changeType,
                                  numParams: 0,
                                  returnValue: OnChangeRequest,
@@ -309,12 +295,12 @@
     });
   }
 
-  var navConnPromise = new NavConnectHelper(SYSTEMXHR_SERVICE);
+  var navConnHelper = new NavConnectHelper(SYSTEMXHR_SERVICE);
   var realXMLHttpRequest = window.XMLHttpRequest.bind(window);
 
   function XMLHttpRequestShim(options) {
     if (options && options.mozSystem) {
-      return navConnPromise.createAndQueueRequest({
+      return navConnHelper.createAndQueueRequest({
                                                     options: options
                                                   }, FakeXMLHttpRequest);
     } else {
@@ -324,107 +310,9 @@
 
   window.XMLHttpRequest = XMLHttpRequestShim;
 
-  navConnPromise.then(function() {}, e => {
+  navConnHelper.then(function() {}, e => {
     debug('Got an exception while connecting ' + e);
     window.XMLHttpRequest = realXMLHttpRequest;
   });
-
-  function FakeEventTarget(listenerCb, field, promise) {
-    // _listeners[type][ListenerId] => undefined or a callback function
-    var _listeners = {};
-    promise = promise || Promise.resolve(null);
-
-    // And this is something else that might be reusable...
-    function Listener(reqId, extraData) {
-      _listeners[extraData.type][reqId] = extraData.cb;
-      this.serialize = function() {
-        return {
-          id: reqId,
-          data: extraData,
-          processAnswer: answer => {
-            if (answer.event) {
-              listenerCb(answer.event, _listeners[extraData.type][reqId]);
-            }
-          }
-        };
-      };
-    }
-
-    function ListenerRemoval(reqId, extraData) {
-      this.serialize = function() {
-        return {
-          id: reqId,
-          data: extraData,
-          processAnswer: answer => debug('Got an invalid answer for: ' + reqId)
-        };
-      };
-    }
-
-    function Dispatcher(reqId, extraData) {
-      this.serialize = function() {
-        return {
-          id: reqId,
-          data: extraData,
-          processAnswer: answer => debug('Got an invalid answer for: ' + reqId)
-        };
-      };
-    }
-
-    this.addEventListener = function(type, cb, useCapture) {
-      if (!_listeners[type]) {
-        _listeners[type] = {};
-      }
-      promise.then(value => {
-        var data = {
-          operation: 'addEventListener',
-          type: type,
-          useCapture: useCapture,
-          cb: cb
-        };
-
-        data[field] = value;
-        navConnPromise.createAndQueueRequest(data, Listener);
-      });
-    };
-
-    this.removeEventListener = function(type, cb) {
-      var listeners = _listeners[type];
-      var listenerId = -1;
-      for (var key in listeners) {
-        if (listeners[key] === cb) {
-          listenerId = key;
-          break;
-        }
-      }
-
-      if (cbIndex === -1) {
-        return;
-      }
-
-      promise.then(value => {
-        var data = {
-          operation: 'removeEventListener',
-          type: type,
-          listenerId: listenerId
-        };
-
-        data[field] = value;
-        navConnPromise.createAndQueueRequest(data, ListenerRemoval);
-      });
-      delete _listeners[type][listenerId];
-    };
-
-    this.dispatchEvent = function(event) {
-      promise.then(value => {
-        var data = {
-          operation: 'dispatchEvent',
-          event: event
-        };
-
-        data[field] = value;
-        navConnPromise.createAndQueueRequest(data, Dispatcher);
-      });
-    };
-  }
 
 })(window);

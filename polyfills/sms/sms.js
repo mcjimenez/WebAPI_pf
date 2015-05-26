@@ -118,18 +118,10 @@
   };
 
   var fakeMozMobileMessage = {
-
     addEventListener: function(evt, fc) {
       this['on' + evt] = fc;
     }
-
   };
-
-  for(var _op  in _smsOps) {
-    fakeMozMobileMessage[_op] =
-      navConnHelper.methodCall.bind(navConnHelper, _op, _smsOps[_op].numParams,
-                                    _smsOps[_op].returnValue);
-  }
 
   var _handlers = {
     ondeliveryerror: null,
@@ -148,7 +140,7 @@
       },
       set: function(cb) {
         _handlers[handler] = cb;
-        navConnHelper.createAndQueueRequest({handler: handler, cb: cb},
+        navConnPromise.createAndQueueRequest({handler: handler, cb: cb},
                                             HandlerSetRequest);
       }
     })
@@ -159,9 +151,22 @@
 
   exports.navigator.mozMobileMessage = fakeMozMobileMessage;
 
-  var navConnHelper = new NavConnectHelper(SMS_SERVICE);
+  //var navConnHelper = new NavConnectHelper(SMS_SERVICE);
+  var navConnPromise = new NavConnectHelper(SMS_SERVICE);
 
-  navConnHelper.then(function() {}, e => {
+  for(var _op in _smsOps) {
+    fakeMozMobileMessage[_op] =
+      navConnPromise.methodCall.bind(navConnPromise,
+                                     {
+                                       methodName: _op,
+                                       numParams: _smsOps[_op].numParams,
+                                       returnValue: _smsOps[_op].returnValue
+                                     });
+//      navConnHelper.methodCall.bind(navConnHelper, _op, _smsOps[_op].numParams,
+//                                    _smsOps[_op].returnValue);
+  }
+
+  navConnPromise.then(function() {}, e => {
     debug('Got an exception while connecting. ' + e);
     window.navigator.mozMobileMessage.send = null;
     window.navigator.mozMobileMessage.sendMMS = null;

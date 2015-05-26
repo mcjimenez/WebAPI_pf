@@ -1,13 +1,12 @@
-'use strict';
-
 (function(exports) {
+  'use strict';
 
   if (exports.NCPolyfill) {
     return;
   }
 
   function debug(str) {
-    console.log("NC POLYFILL SVR -*- -->" + str);
+    //console.log('NC POLYFILL SVR -*-:' + str);
   }
 
   var cltCount = 0;
@@ -22,10 +21,10 @@
     debug('getDefaultMsg called');
     return {
       data: {
-        data: "Hello from the main thread!",
+        data: 'Hello from the main thread!',
         count: cltCount++
       },
-      originURL: "We need an origin URL here!"
+      originURL: 'We need an origin URL here!'
     };
   };
 
@@ -74,11 +73,11 @@
         messageChannel.port1.onmessage = function(event) {
           // We will get the answer for this communication here...
           if (event.data.error) {
-            debug("Got an error as a response: " + event.data.error);
+            debug('Got an error as a response: ' + event.data.error);
           } else {
             // The first answer we will get is just the accept or reject, which
             // we can use to remove this.
-            debug("Got an answer for the request!: " +
+            debug('Got an answer for the request!: ' +
                   JSON.stringify(event.data));
             // Here I have to check if the connection was accepted...
             if (event.data.accepted) {
@@ -98,11 +97,15 @@
               messageChannel.port1.onmessage(event);
 
             } else {
+              debug('Send reject msg:' + event.data);
+              serverPort.postMessage(event.data);
               delete messageChannel.port1;
             }
           }
         };
 
+        debug('Sending message to the SW: ' +
+              (sw.active ?' sw active':'sw NO active'));
         sw.active && sw.active.postMessage(message, [messageChannel.port2]);
         // We could probably do this earlier...
         serverPort.start();
