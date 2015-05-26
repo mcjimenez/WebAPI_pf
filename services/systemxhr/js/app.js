@@ -17,7 +17,6 @@
     var remotePortId = request.remotePortId;
     var reqId = request.remoteData.id;
     var requestOp = request.remoteData.data;
-
     _XMLHttpRequests[reqId] = new XMLHttpRequest(requestOp.options);
     // Let's assume this works always...
     channel.postMessage({remotePortId: remotePortId, data: {id: reqId}});
@@ -101,7 +100,7 @@
     set: function(channel, request) {
       var xhrId = request.remoteData.data.xhrId;
       var opData = request.remoteData.data.params;
-      _XMLHttpRequests[xhrId][opData[0]] = options[1];
+      _XMLHttpRequests[xhrId][opData[0]] = opData[1];
     },
 
     addEventListener: addEventTargetEvent.bind(this),
