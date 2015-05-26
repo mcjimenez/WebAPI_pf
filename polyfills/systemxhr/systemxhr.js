@@ -183,16 +183,19 @@
 
     this.upload = new FakeXMLHttpRequestUpload();
 
-    var readOnlyProperties = [
+    var properties = [
       'response', 'responseText', 'responseType', 'responseXML',
       'status', 'statusText', 'readyState',' timeout', 'responseURL'
     ];
 
-    readOnlyProperties.forEach(property => {
+    properties.forEach(property => {
       Object.defineProperty(this, property, {
         enumerable: true,
         get: function() {
           return this['_' + property];
+        },
+        set: function(value) {
+          this['_' + property] = value;
         }
       });
     });
@@ -208,7 +211,7 @@
     });
 
     this._updateXMLHttpRequestObject = function(evt) {
-      readOnlyProperties.forEach(property => {
+      properties.forEach(property => {
         this['_' + property] = evt.target[property];
       });
       this['_responseHeaders'] = evt.responseHeaders;
