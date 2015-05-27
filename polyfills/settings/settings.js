@@ -21,7 +21,7 @@
 //               data: {
 //                 lockId: lockId,
 //                 operation: 'set'|'get',
-//                 settings: settings
+//                 params: [settings]
 //               }
 //             }
 // * Answer: { id: requestId,
@@ -36,7 +36,7 @@
 // Answer: Will be invoked when there's activity with the MozSettingsEvent
 //  (like) object:
 //    { id: requestId,
-//      data: mozSettingsEvent }
+//      event: mozSettingsEvent }
 
 
 (function(window) {
@@ -45,6 +45,7 @@
 
   var NavConnectHelper = window.NavConnectHelper;
   var FakeDOMRequest = window.FakeDOMRequest;
+  var OnChangeRequest = window.OnChangeRequest;
 
   function debug(text) {
     console.log('*-*-*- Settings PF: ' + text);
@@ -58,11 +59,8 @@
   // Wishful thinking at the moment...
   const SETTINGS_SERVICE = 'https://settingsservice.gaiamobile.org';
 
-  // It's nice being monothread...
-  var _currentRequestId = 1;
-
   // SettingsLock polyfill..
-  function FakeSettingsLock() {
+  function FakeSettingsLock(reqId, extraData) {
 
     var _resolve, _reject;
     var _lock = new Promise((resolve, reject) => {
@@ -80,37 +78,21 @@
 
     this.closed = false;
 
-    function _createAndQueueRequest(data) {
-      var request = new FakeDOMRequest(++_currentRequestId, data);
-      Promise.all([navConnPromise, _lock]).then(values => {
-        // When this is executed the promise should have resolved and thus we
-        // should have this.
-        request.data.lockId = _lockId;
-        values[0].sendObject(request);
-      });
-      return request;
-    }
-
-    this.set = function(settings) {
-      return _createAndQueueRequest({
-        operation: 'set',
-        settings: settings
-      });
-    };
-
-    this.get = function(settings) {
-      return _createAndQueueRequest({
-        operation: 'get',
-        settings: settings
-      });
-    };
+    ['set', 'get'].forEach(method => {
+      this[method] = navConnHelper.methodCall.bind(navConnHelper,
+                                                  {
+                                                    methodName: method,
+                                                    numParams: 1,
+                                                    returnValue: FakeDOMRequest,
+                                                    promise: _lock,
+                                                    field: 'lockId'
+                                                  });
+    });
 
     this.serialize = function() {
       return {
-        id: ++_currentRequestId,
-        data: {
-          operation: 'createLock'
-        },
+        id: reqId,
+        data: extraData,
         processAnswer: function(answer) {
           if (!answer.error) {
             _resolve(answer.id);
@@ -126,9 +108,9 @@
   // Returns a SettingsLock object to safely access settings asynchronously.
   // Note that the lock might be created and yet everything fail on it...
   var createLock = function() {
-    var lock = new FakeSettingsLock();
-    navConnPromise.then(navConnHelper => navConnHelper.sendObject(lock));
-    return lock;
+    return navConnHelper.createAndQueueRequest({
+                                                  operation: 'createLock'
+                                                }, FakeSettingsLock);
   };
 
 
@@ -136,55 +118,72 @@
   var _observers = {};
 
   // And this is something else that might be reusable...
-  function Observer(setting, callback) {
+  function Observer(reqId, extraData) {
     this._id = null;
+    _observers[extraData.settingName][extraData.callback] = this;
     this.serialize = () => {
       if (!this._id) {
-        this._id = ++_currentRequestId;
+        this._id = reqId;
       }
       return {
         id: this._id,
-        data: {
-          operation: 'addObserver',
-          settingName: setting
-        },
-        processAnswer: answer => callback(answer.data)
+        data: extraData,
+        processAnswer: answer => extraData.callback(answer.event)
       };
     };
   }
 
-  function ObserverRemoval(observer) {
+  function ObserverRemoval(reqId, extraData) {
     this.serialize = () => {
       return {
-        id: observer._id,
-        data: {
-          operation: 'removeObserver',
-          settingName: setting
-        }
+        id: reqId,
+        data: extraData
       };
     };
   }
 
   // Allows to bind a function to any change on a given settings
   var addObserver = function(setting, callback) {
-    var observer = new Observer(setting, callback);
     if (!_observers[setting]) {
       _observers[setting] = {};
     }
-    _observers[setting][callback] = observer;
-    navConnPromise.then(navConnHelper => navConnHelper.sendObject(observer));
+
+    navConnHelper.createAndQueueRequest({
+                                         operation: 'addObserver',
+                                         settingName: setting,
+                                         callback: callback
+                                        }, Observer);
   };
 
   // Allows to unbind a function previously set with addObserver.
   var removeObserver = function(setting, callback) {
-    if (!_observers[setting][callback]) {
+    var observer = _observers[setting][callback];
+    if (!observer) {
       return;
     }
-    var obRemoval = new ObserverRemoval(_observers[setting][callback]);
-    navConnPromise.then(navConnHelper => navConnHelper.sendObject(obRemoval));
+
+    navConnHelper.createAndQueueRequest({
+                                         operation: 'removeObserver',
+                                         settingName: setting,
+                                         observerId: observer._id
+                                        }, ObserverRemoval);
     delete _observers[setting][callback];
   };
 
+ // This can be a common part
+  function OnChangeRequest(reqId, extraData) {
+    this.serialize = function() {
+      return {
+        id: reqId,
+        data: extraData,
+        processAnswer: answer => {
+          if (answer.event) {
+            extraData.callback(answer.event);
+          }
+        }
+      };
+    };
+  }
 
   // This will have to be a SettingsManager object...
   // Note that since mozSettings constructor is synchronous but we can't make
@@ -196,27 +195,22 @@
     removeObserver: removeObserver,
     set onsettingschange(cb) {
       this._onsettingschange = cb;
-      this._onsettingschangeId = this._onsettingschangeId ||
-                                   ++_currentRequestId;
-      var commandObject = {
-        serialize: function() {
-          return {
-            id: ++_currentRequestId,
-            data: {
-              operation: 'onsettingschange'
-            },
-            processAnswer: answer => cb(answer.data)
-          };
-        }
-      };
-      navConnPromise.
-        then(navConnHelper => navConnHelper.sendObject(commandObject));
+      // Avoid to send another request because it's useless
+      if (this._onsettingschangeId) {
+        return;
+      }
+      this._onsettingschangeId = 1;
+      var self = this;
+      navConnHelper.createAndQueueRequest({
+        operation: 'onsettingschange',
+        callback: self._onsettingschange
+      }, OnChangeRequest);
     }
   };
 
-  var navConnPromise = new NavConnectHelper(SETTINGS_SERVICE);
+  var navConnHelper = new NavConnectHelper(SETTINGS_SERVICE);
 
-  navConnPromise.then(function(){}, e => {
+  navConnHelper.then(function(){}, e => {
     debug('Got an exception while connecting ' + e);
     window.navigator.mozSettings.createLock = null;
     window.navigator.mozSettings.addObserver = null;
