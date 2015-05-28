@@ -92,7 +92,9 @@
     this.serialize = function() {
       return {
         id: reqId,
-        data: extraData,
+        data: {
+          operation: 'createLock'
+        },
         processAnswer: function(answer) {
           if (!answer.error) {
             _resolve(answer.id);
@@ -108,39 +110,44 @@
   // Returns a SettingsLock object to safely access settings asynchronously.
   // Note that the lock might be created and yet everything fail on it...
   var createLock = function() {
-    return navConnHelper.createAndQueueRequest({
-                                                  operation: 'createLock'
-                                                }, FakeSettingsLock);
+    return navConnHelper.createAndQueueRequest({}, FakeSettingsLock);
   };
 
 
   // _observers[setting][function] => undefined or an Observer object
   var _observers = {};
 
-  // And this is something else that might be reusable...
-  function Observer(reqId, extraData) {
+  function ObsererOp(operation, reqId, extraData) {
     this._id = null;
-    _observers[extraData.settingName][extraData.callback] = this;
+    if (operation === 'addObserver') {
+      _observers[extraData.settingName][extraData.callback] = this;
+    }
+
     this.serialize = () => {
       if (!this._id) {
         this._id = reqId;
       }
+      var data = {
+        operation: operation
+      };
+
+      for (var key in extraData) {
+        data[key] = extraData[key];
+      }
+
       return {
         id: this._id,
-        data: extraData,
-        processAnswer: answer => extraData.callback(answer.event)
+        data: data,
+        processAnswer: answer => {
+            extraData.callback && typeof extraData.callback === 'function' &&
+              extraData.callback(answer.event);
+        }
       };
     };
   }
 
-  function ObserverRemoval(reqId, extraData) {
-    this.serialize = () => {
-      return {
-        id: reqId,
-        data: extraData
-      };
-    };
-  }
+  var Observer = ObsererOp.bind(undefined, 'addObserver');
+  var ObserverRemoval = ObsererOp.bind(undefined, 'removeObserver');
 
   // Allows to bind a function to any change on a given settings
   var addObserver = function(setting, callback) {
@@ -149,7 +156,6 @@
     }
 
     navConnHelper.createAndQueueRequest({
-                                         operation: 'addObserver',
                                          settingName: setting,
                                          callback: callback
                                         }, Observer);
@@ -163,26 +169,15 @@
     }
 
     navConnHelper.createAndQueueRequest({
-                                         operation: 'removeObserver',
                                          settingName: setting,
                                          observerId: observer._id
                                         }, ObserverRemoval);
     delete _observers[setting][callback];
   };
 
- // This can be a common part
-  function OnChangeRequest(reqId, extraData) {
-    this.serialize = function() {
-      return {
-        id: reqId,
-        data: extraData,
-        processAnswer: answer => {
-          if (answer.event) {
-            extraData.callback(answer.event);
-          }
-        }
-      };
-    };
+  function execOnsettingsChange(evt) {
+    this._onsettingschange && typeof this._onsettingschange == 'function' &&
+      this._onsettingschange(evt);
   }
 
   // This will have to be a SettingsManager object...
@@ -196,14 +191,14 @@
     set onsettingschange(cb) {
       this._onsettingschange = cb;
       // Avoid to send another request because it's useless
-      if (this._onsettingschangeId) {
+      if (this._onsettingschangeAlreadySet) {
         return;
       }
-      this._onsettingschangeId = 1;
+      this._onsettingschangeAlreadySet = true;
       var self = this;
       navConnHelper.createAndQueueRequest({
         operation: 'onsettingschange',
-        callback: self._onsettingschange
+        callback: execOnsettingsChange.bind(self)
       }, OnChangeRequest);
     }
   };
