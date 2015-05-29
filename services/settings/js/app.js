@@ -84,7 +84,7 @@
     set: buildDOMRequestAnswer.bind(this, 'set')
   };
 
-  var processSWRequest = function(channel, evt) {
+  var processSWRequest = function(aAcl, aChannel, aEvt) {
     // We can get:
     // * createLock
     // * addObserver
@@ -92,21 +92,42 @@
     // * lock.set || lock.get
     // All the operations have a requestId, and the lock operations also include
     // a lock id.
-    var request = evt.data.remoteData;
+    var request = aEvt.data.remoteData;
     var requestOp = request.data.operation;
+    var targetURL = aEvt.data.targetURL;
+
+    var forbidCall = function(constraints) {
+      var settings = [];
+      switch(requestOp) {
+        case 'addObserver':
+        case 'removeObserver':
+          settings = [request.data.settingName];
+          break;
+        case 'set':
+          settings = Object.keys(request.data.params[0]);
+          break;
+        case 'get':
+          settings = request.data.params;
+          break;
+      }
+      return !settings.every(setting => constraints.indexOf(setting) >= 0);
+    };
+
+    if (window.ServiceHelper.isForbidden(aAcl, targetURL, requestOp,
+                                         forbidCall)) {
+      return;
+    }
 
     debug('processSWRequest --> processing a msg:' +
-          (evt.data ? JSON.stringify(evt.data): 'msg without data'));
+          (aEvt.data ? JSON.stringify(aEvt.data): 'msg without data'));
     if (requestOp in _operations) {
       _operations[requestOp] &&
-        _operations[requestOp](channel, evt.data);
+        _operations[requestOp](aChannel, aEvt.data);
     } else {
       console.error('Settings service unknown operation:' + requestOp);
     }
   };
 
-
-  // Testing purpose only!!!!
   window.addEventListener('load', function () {
     if (window.ServiceHelper) {
       debug('APP serviceWorker in navigator');

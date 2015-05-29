@@ -12,7 +12,7 @@
   var _deviceStorages = {};
   var _listeners = {};
 
-  var processSWRequest = function(channel, evt) {
+  var processSWRequest = function(aAcl, aChannel, aEvt) {
     // We can get:
     // * methodName
     // * onchange
@@ -22,12 +22,25 @@
     // * dispatchEvent
     // All the operations have a requestId, and the lock operations also include
     // a deviceStorage id.
-    var remotePortId = evt.data.remotePortId;
-    var request = evt.data.remoteData;
+    var remotePortId = aEvt.data.remotePortId;
+    var request = aEvt.data.remoteData;
     var requestOp = request.data;
+    var targetURL = aEvt.data.targetURL;
+
+    // TODO: Add resource access constraint
+    // It should return true if resource access is forbidden,
+    // false if it's allowed
+    var forbidCall = function(constraints) {
+      return false;
+    };
+
+    if (window.ServiceHelper.isForbidden(aAcl, targetURL, requestOp.operation,
+                                        forbidCall)) {
+      return;
+    }
 
     function observerTemplate(evt) {
-      channel.postMessage({
+      aChannel.postMessage({
         remotePortId: remotePortId,
         data: {
           id: request.id,
@@ -40,7 +53,7 @@
     }
 
     function listenerTemplate(evt) {
-      channel.postMessage({
+      aChannel.postMessage({
         remotePortId: remotePortId,
         data: {
           id: request.id,
@@ -60,7 +73,7 @@
         }
       });
       // Let's assume this works always...
-      channel.postMessage({remotePortId: remotePortId, data: {id: request.id}});
+      aChannel.postMessage({remotePortId: remotePortId, data: {id: request.id}});
     } else if (requestOp.operation === 'onchange') {
       _deviceStorages[requestOp.deviceStorageId].onchange = observerTemplate;
     } else if (requestOp.operation === 'addEventListener') {
@@ -93,7 +106,7 @@
           } else {
             console.info(files);
             // Send message
-            channel.postMessage({
+            aChannel.postMessage({
               remotePortId: remotePortId,
               data: { id : request.id, result: files}}
             );
@@ -101,7 +114,7 @@
         };
 
         cursor.onerror = () => {
-          channel.postMessage({
+          aChannel.postMessage({
             remotePortId: remotePortId,
             data: {
               id : request.id,
@@ -117,12 +130,12 @@
       _deviceStorages[requestOp.deviceStorageId][requestOp.operation]
         [method](_deviceStorages[requestOp.deviceStorageId], requestOp.params).
           then(result => {
-            channel.postMessage({
+            aChannel.postMessage({
               remotePortId: remotePortId,
               data: { id : request.id, result: result}}
             );
       }).catch(error => {
-        channel.postMessage({
+        aChannel.postMessage({
           remotePortId: remotePortId,
           data: {
             id : request.id,
@@ -133,8 +146,6 @@
     }
   };
 
-
-  // Testing purpose only!!!!
   window.addEventListener('load', function () {
     if (window.ServiceHelper) {
       debug('APP serviceWorker in navigator');
