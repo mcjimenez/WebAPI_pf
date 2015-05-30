@@ -92,6 +92,7 @@
       return false;
     }
     var constraints = rules[aOperation];
+
     return !constraints ||
            (constraints.length !== 0 && aForbidCall(constraints));
   };
