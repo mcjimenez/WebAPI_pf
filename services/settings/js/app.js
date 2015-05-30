@@ -97,7 +97,6 @@
     var targetURL = aEvt.data.targetURL;
 
     var forbidCall = function(constraints) {
-debug("CJC forbidCall. OPERACION:"+ requestOp+", constraints:"+ JSON.stringify(constraints));
       var settings = [];
       switch(requestOp) {
         case 'addObserver':
@@ -111,8 +110,6 @@ debug("CJC forbidCall. OPERACION:"+ requestOp+", constraints:"+ JSON.stringify(c
           settings = request.data.params;
           break;
       }
-debug("CJC forbidCall. settings:" +JSON.stringify(settings) +
-      (settings.every(setting => constraints.indexOf(setting) >= 0)?"ALLOWED":"FORBIDDEN"));
       return !settings.every(setting => constraints.indexOf(setting) >= 0);
     };
 
