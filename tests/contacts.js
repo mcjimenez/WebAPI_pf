@@ -155,7 +155,7 @@
 
       try {
         log('Starting contacts polyfill tests');
-//        testGetCount();
+        testGetCount();
  //       testGetAll();
  //       testFind();
  //       testClear();
