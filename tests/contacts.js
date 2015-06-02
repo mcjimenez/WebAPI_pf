@@ -155,13 +155,13 @@
 
       try {
         log('Starting contacts polyfill tests');
-        testGetCount();
-        testGetAll();
-        testFind();
-        testClear();
+//        testGetCount();
+ //       testGetAll();
+ //       testFind();
+ //       testClear();
         testSave();
-        testGetRevision();
-        testRemove();
+ //       testGetRevision();
+ //       testRemove();
       } catch (e) {
         log("Finished early with " + e);
       }
