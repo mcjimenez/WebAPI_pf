@@ -108,7 +108,8 @@
     removeEventListener: function(channel, request) {
       var requestOp = request.remoteData.data;
       var xhrId = request.remoteData.data.xhrId;
-      _XMLHttpRequests[xhrId].removeObserver(_listeners[requestOp.listenerId]);
+      _XMLHttpRequests[xhrId].removeEventListener(
+        _listeners[requestOp.listenerId]);
     },
 
     dispatchEvent: function(channel, request) {
