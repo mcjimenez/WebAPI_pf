@@ -127,6 +127,7 @@
 
       function saveContact(contact) {
         _contacts.save(contact).then(result => {
+console.log("CJC Salvado bien");
           channel.postMessage({
             remotePortId: remotePortId,
             data: { id : reqId, result: result }
@@ -137,6 +138,7 @@
       var fakeContact = opData[0];
       if (fakeContact.id === null || typeof fakeContact.id === 'undefined' ||
         fakeContact.id === 'undefined') {
+console.log("CJC vamos a salvar");
         saveContact(new mozContact(fakeContact));
       } else {
         var filter = {
