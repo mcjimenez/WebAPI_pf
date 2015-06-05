@@ -97,6 +97,10 @@
     {
       methodName:'remove',
       numParams: 1
+    },
+    {
+      methodName:'save',
+      numParams: 1
     }
     ].forEach(methodInfo => {
       this[methodInfo.methodName] = navConnHelper.methodCall.bind(navConnHelper,
@@ -106,17 +110,6 @@
           returnValue: methodInfo.returnValue || FakeDOMRequest
         });
     });
-
-    this.save = function(contact) {
-      var toSave = typeof contact.toJSON  === 'function' ? contact.toJSON() :
-        contact;
-
-      return navConnHelper.methodCall({
-        methodName: 'save',
-        numParams: 1,
-        returnValue: FakeDOMRequest
-      }, toSave);
-    };
   }
 
   /** POLYFILL PART **/
