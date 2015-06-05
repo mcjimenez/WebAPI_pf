@@ -190,7 +190,7 @@
       return false;
     };
 
-    if (window.ServiceHelper.isForbidden(aAcl, targetURL, requestOp.operation,
+    if (window.ServiceHelper.isForbidden(aAcl, targetURL, requestOp,
                                         forbidCall)) {
       return;
     }
