@@ -1,6 +1,6 @@
 {
-  "settings": {"origin": "https://antonioma.github.io"},
-  "fmradio": {"origin": "https://antonioma.github.io"},
+  "settings": {"origin": "https://mcjimenez.github.io"},
+  "fmradio": {"origin": "https://mcjimenez.github.io"},
   "tcpsocket": {"origin": "https://servtcpsocket.github.io"},
   "sms": {"origin": "https://servsms.github.io"},
   "contacts": {"origin": "https://servcontacts.github.io"},
