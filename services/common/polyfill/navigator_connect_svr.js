@@ -149,7 +149,8 @@
           return;
         }
         var port = this.port = request.port;
-        debug('IAC.onconnection: Sending conexion msg.');
+        var from = this.from = request.from;
+        debug('IAC.onconnection: Sending conexion msg. [FROM: ' + from +']');
         // Sends a connection request to the service worker
 
         // Waits for the first message before sending anything to the service
