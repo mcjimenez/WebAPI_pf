@@ -13,7 +13,9 @@
   "connections": {
     "https://devicestorageservice.gaiamobile.org": {
       "description": "Test SHIM IAC - DeviceStorage",
-      "rules": {}
+      "rules": {
+        "pageURLs" : [".*"]
+      }
     }
   },
   "permissions": {

@@ -13,7 +13,9 @@
   "connections": {
     "https://settingsservice.gaiamobile.org": {
       "description": "Test SHIM IAC - Settings",
-      "rules": {}
+      "rules": {
+        "pageURLs" : [".*"]
+      }
     }
   },
   "permissions": {
