@@ -6,7 +6,7 @@
   }
 
   function debug(str) {
-    //console.log('NC POLYFILL SVR -*-:' + str);
+    console.log('NC POLYFILL SVR -*-:' + str);
   }
 
   var cltCount = 0;
