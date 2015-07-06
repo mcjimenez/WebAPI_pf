@@ -12,8 +12,10 @@
   },
   "connections": {
     "https://systemxhrservice.gaiamobile.org": {
-      "description": "Test SHIM IAC - DeviceStorage",
-      "rules": {}
+      "description": "Test Polyfill IAC - SystemXHR",
+      "rules": {
+        "pageURLs" : ["http://mcjimenez.github.io/WebAPI_pf/TEST/index.html"]
+      }
     }
   },
   "permissions": {

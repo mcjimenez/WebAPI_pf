@@ -12,7 +12,7 @@
   },
   "connections": {
     "https://settingsservice.gaiamobile.org": {
-      "description": "Test SHIM IAC - Settings",
+      "description": "Test POLYFILL IAC - Settings",
       "rules": {
         "pageURLs" : [".*"]
       }

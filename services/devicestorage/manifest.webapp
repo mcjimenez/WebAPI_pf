@@ -12,9 +12,9 @@
   },
   "connections": {
     "https://devicestorageservice.gaiamobile.org": {
-      "description": "Test SHIM IAC - DeviceStorage",
+      "description": "Test POLYFILL - DeviceStorage",
       "rules": {
-        "pageURLs" : [".*"]
+        "pageURLs" : ["http://mcjimenez.github.io/WebAPI_pf/tests/index.html"]
       }
     }
   },

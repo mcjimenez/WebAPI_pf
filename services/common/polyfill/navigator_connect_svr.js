@@ -150,23 +150,12 @@
         }
         var port = this.port = request.port;
         var from = this.from = request.from;
-        debug('IAC.onconnection: Sending conexion msg. [FROM: ' + from +']');
+        debug('IAC.onconnection: Sending conexion msg. Port:' +
+              port + ', from:' + from);
         // Sends a connection request to the service worker
-
-        // Waits for the first message before sending anything to the service
-        // worker.
-        // The first message received will hold the origin URL. This is *not*
-        // secure but IAC does not pass the origin of the IAC messages.
-        port.onmessage = aMessage => {
-          debug('SVR: 1st port.onmessage: ' + JSON.stringify(aMessage) +
-                ', ' + JSON.stringify(aMessage.data));
-          var originURL = aMessage.data.originURL;
-          sendConnectionMessage({
-              originURL: originURL,
-              data: null}, port);
-        };
+        debug('Sending connection message...');
+        sendConnectionMessage({ originURL: from, data: null }, port);
       }
-
     };
 
     return {
