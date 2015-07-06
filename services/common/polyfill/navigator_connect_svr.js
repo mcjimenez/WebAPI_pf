@@ -73,6 +73,7 @@
         messageChannel.port1.onmessage = function(event) {
           // We will get the answer for this communication here...
           if (event.data.error) {
+debug('***** CJC Got an error as a response: ' + event.data.error);
             debug('Got an error as a response: ' + event.data.error);
           } else {
             // The first answer we will get is just the accept or reject, which
@@ -81,6 +82,7 @@
                   JSON.stringify(event.data));
             // Here I have to check if the connection was accepted...
             if (event.data.accepted) {
+debug('***** CJC ACCEPTED!!!');
               // And replace the event handler to process messages!
               messageChannel.port1.onmessage = function(messageEvent) {
                 // Here we have to pass this message to the other side of the
@@ -97,6 +99,7 @@
               messageChannel.port1.onmessage(event);
 
             } else {
+debug('***** CJC REJECT!!!');
               debug('Send reject msg:' + event.data);
               serverPort.postMessage(event.data);
               delete messageChannel.port1;

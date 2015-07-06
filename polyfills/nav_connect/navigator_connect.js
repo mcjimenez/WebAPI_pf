@@ -59,6 +59,7 @@
                   debug('Got the accept response. evt.data: ' +
                         JSON.stringify(evt.data));
                   shimPort.onmessage = null;
+debug('*****CJC client **** accepted?' + (evt.data.accepted? ' ACCEPTED':'REJECT'));
                   evt.data.accepted && resolve(shimPort) ||
                                        reject('Connection not allowed');
                 };
@@ -66,6 +67,7 @@
             },
             reason => {
               pendingConnection = null;
+debug('*****CJC client ****Connection rejected. Reason:' + reason);
               debug('Connection rejected. Reason:' + reason);
               reject(reason);
             }

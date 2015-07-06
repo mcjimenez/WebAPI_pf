@@ -42,6 +42,7 @@
       };
 
       navigator.connect(serviceURL).then(port => {
+debug('***CJC CLIENT NAV_CON --> ACCEPTED conexion en ! ' + serviceURL);
         debug('Successfully established connection to ' + serviceURL);
         _port = port;
         port.onmessage = function (evt) {
@@ -71,7 +72,10 @@
         };
 
         resolve(realHandler);
-      }).catch(error => reject(error));
+      }).catch(error => {
+debug('***CJC CLIENT NAV_CON --> REJECT conexion en ! ' + serviceURL + '.Error:' + error);
+        reject(error);
+      });
     });
 
     retValue.createAndQueueRequest = function(data, constructor) {
