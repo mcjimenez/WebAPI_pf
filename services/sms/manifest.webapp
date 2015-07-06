@@ -15,7 +15,9 @@
   "connections": {
     "https://smsservice.gaiamobile.org": {
       "description": "Test polyfill service - SMS",
-      "rules": {}
+      "rules": {
+        "pageURLs" : ["http://mcjimenez.github.io/WebAPI_pf/tests/index.html"]
+      }
     }
   },
   "permissions": {
