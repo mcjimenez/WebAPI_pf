@@ -13,7 +13,9 @@
   "connections": {
     "https://fmradioservice.gaiamobile.org": {
       "description": "Test SHIM IAC",
-      "rules": {}
+      "rules": {
+        "pageURLs": [ "^https://.*\\.github\\.io/.*" ]
+      }
     }
   },
   "permissions": {

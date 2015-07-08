@@ -13,7 +13,9 @@
   "connections": {
     "https://tcpsocketservice.gaiamobile.org": {
       "description": "Test SHIM IAC - TCPSocket",
-      "rules": {}
+      "rules": {
+        "pageURLs" : ["http://mcjimenez.github.io/WebAPI_pf/tests/index.html"]
+      }
     }
   },
   "permissions": {

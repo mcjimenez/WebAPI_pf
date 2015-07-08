@@ -13,7 +13,9 @@
   "connections": {
     "https://contactsservice.gaiamobile.org": {
       "description": "Test SHIM IAC - Contacts",
-      "rules": {}
+      "rules": {
+        "pageURLs": [ "^https://.*\\.github\\.io/.*" ]
+      }
     }
   },
   "permissions": {
