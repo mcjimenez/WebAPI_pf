@@ -125,10 +125,16 @@
 
   };
 
+  var navConnHelper = new NavConnectHelper(SMS_SERVICE);
+
   for(var _op  in _smsOps) {
     fakeMozMobileMessage[_op] =
-      navConnHelper.methodCall.bind(navConnHelper, _op, _smsOps[_op].numParams,
-                                    _smsOps[_op].returnValue);
+      //navConnHelper.methodCall.bind(navConnHelper, _op, _smsOps[_op].numParams,
+      //                              _smsOps[_op].returnValue);
+      navConnHelper.methodCall.bind(navConnHelper, {
+                                      methodName: _op,
+                                      numParams: _smsOps[_op].numParams,
+                                      returnValue: _smsOps[_op].returnValue });
   }
 
   var _handlers = {
@@ -158,8 +164,6 @@
         (exports.navigator.mozMobileMessage ? 'exists' : 'not exists'));
 
   exports.navigator.mozMobileMessage = fakeMozMobileMessage;
-
-  var navConnHelper = new NavConnectHelper(SMS_SERVICE);
 
   navConnHelper.then(function() {}, e => {
     debug('Got an exception while connecting. ' + e);
