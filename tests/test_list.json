@@ -1,10 +1,10 @@
 {
   "settings": {"origin": "https://mcjimenez.github.io"},
   "fmradio": {"origin": "https://mcjimenez.github.io"},
-  "tcpsocket": {"origin": "https://servtcpsocket.github.io"},
-  "sms": {"origin": "https://servsms.github.io"},
-  "contacts": {"origin": "https://servcontacts.github.io"},
-  "devicestorage": {"origin": "https://servdevstorage.github.io"},
-  "systemxhr": {"origin": "https://servsystemxhr.github.io"}
+  "tcpsocket": {"origin": "https://mcjimenez.github.io"},
+  "sms": {"origin": "https://mcjimenez.github.io"},
+  "contacts": {"origin": "https://mcjimenez.github.io"},
+  "devicestorage": {"origin": "https://mcjimenez.github.io"},
+  "systemxhr": {"origin": "https://mcjimenez.github.io"}
 }
 
